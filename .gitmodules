@@ -1,0 +1,4 @@
+[submodule "sdk/JN-SW-4170"]
+	path = sdk/JN-SW-4170
+	url = https://github.com/igorlistopad/JN-SW-4170.git
+	branch = v1840
