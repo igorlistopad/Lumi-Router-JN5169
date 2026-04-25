@@ -1,11 +1,9 @@
-Build/*.d
-Build/*.o
-Build/*.bin
-Build/*.elf
-Build/*.map
-Source/pdum_apdu.S
-Source/pdum_gen.*
-Source/zps_gen.*
+build/
+sdk/
+src/pdum_apdu.S
+src/pdum_gen.*
+src/zps_gen.*
+tools/
 
 # MacOS indexing file
 .DS_Store
