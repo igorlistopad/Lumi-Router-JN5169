@@ -258,7 +258,7 @@ install-sdk: $(SDK_BASE_DIR)/Stack
 
 $(SDK_BASE_DIR)/Stack: $(SDK_BASE_DIR)
 ifeq ($(wildcard $(SDK_BASE_DIR)/Stack), )
-ifneq ($(shell which git), )
+ifneq ($(shell git submodule status $(SDK_BASE_DIR) 2> /dev/null), )
 	git submodule update --init
 else
 	wget https://github.com/igorlistopad/JN-SW-4170/archive/refs/heads/v1840.tar.gz \
