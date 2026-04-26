@@ -14,8 +14,12 @@ TARGET = LumiRouter
 ###############################################################################
 # Application build date
 
-BUILD_DATE = 20210320
-CFLAGS    += -DBUILD_DATE_STRING=\"$(BUILD_DATE)\"
+BUILD_DATE ?= NULL
+ifeq ($(BUILD_DATE), NULL)
+	CFLAGS += -DBUILD_DATE_STRING=\"$(shell date -u +%Y%m%d)\"
+else
+	CFLAGS += -DBUILD_DATE_STRING=\"$(BUILD_DATE)\"
+endif
 
 ###############################################################################
 # Network settings
@@ -107,7 +111,11 @@ ifeq ($(DEBUG), UART1)
 	TARGET_FEATURES := $(TARGET_FEATURES)_DEBUG
 endif
 
-GENERATED_FILE_NAME = $(TARGET)$(TARGET_FEATURES)_$(BUILD_DATE)
+ifneq ($(BUILD_DATE), NULL)
+	TARGET_FEATURES := $(TARGET_FEATURES)_$(BUILD_DATE)
+endif
+
+GENERATED_FILE_NAME = $(TARGET)$(TARGET_FEATURES)
 
 ###############################################################################
 # Path definitions
@@ -244,7 +252,7 @@ endif
 ###############################################################################
 
 clean:
-	rm -f $(APPOBJS) $(APPDEPS) $(APP_BLD_DIR)/$(TARGET)*_$(BUILD_DATE).*
+	rm -f $(APPOBJS) $(APPDEPS) $(APP_BLD_DIR)/$(TARGET)*.map $(APP_BLD_DIR)/$(TARGET)*.elf $(APP_BLD_DIR)/$(TARGET)*.bin
 	rm -f $(APP_SRC_DIR)/pdum_gen.* $(APP_SRC_DIR)/zps_gen.* $(APP_SRC_DIR)/pdum_apdu.S
 	@echo
 
