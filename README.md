@@ -33,3 +33,26 @@ Issue the following command in the command line.
 ```shell
 jntool soft_reset
 ```
+
+## Building Firmware
+
+You can open this repo with the configured environment using GitHub Codespaces or VS Code Dev Containers. Click on one of the buttons below to open this repo in one of those options.
+
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=lightgrey&logo=github)](https://codespaces.new/igorlistopad/Lumi-Router-JN5169)
+[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/igorlistopad/Lumi-Router-JN5169)
+
+### Linux
+
+Supported architectures: `aarch64` (ARM 64-bit), `amd64` (x86_64)
+
+Prerequisites:
+ - make
+ - Python 3.x with `xmltodict` and `pycryptodome` libraries installed
+
+```bash
+git clone https://github.com/igorlistopad/Lumi-Router-JN5169.git
+make install
+make
+```
+
+Firmware binary is located at `build/LumiRouter.bin`
