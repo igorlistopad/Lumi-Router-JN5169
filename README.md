@@ -8,8 +8,17 @@ This instruction assumes that an alternative __OpenWRT__ firmware is already ins
 
 ## Firmware
 
+#### Web interface
+
+1. Go to `LuCI -> System -> Zigbee Tools`
+2. Click the `Upload Firmware…` button.
+3. Select the firmware file to upload.
+4. Click the `Upload` button.
+
+#### Command-line
+
 1. Connect to device via SSH.
-2. Issue the following commands in the command line.
+2. Issue the following commands.
 
 ```shell
 wget https://github.com/igorlistopad/Lumi-Router-JN5169/releases/latest/download/LumiRouter.bin -P /tmp
@@ -18,7 +27,11 @@ jnflash /tmp/LumiRouter.bin
 
 ## Pairing
 
-Issue the following command in the command line.
+#### Web interface
+
+Go to `LuCI -> System -> Zigbee Tools` and click the `Erase PDM` button.
+
+#### Command-line
 
 ```shell
 jntool erase_pdm
@@ -28,7 +41,11 @@ After this the device will automatically join.
 
 ## Restart
 
-Issue the following command in the command line.
+#### Web interface
+
+Go to `LuCI -> System -> Zigbee Tools` and click the `Soft reset` button.
+
+#### Command-line
 
 ```shell
 jntool soft_reset
