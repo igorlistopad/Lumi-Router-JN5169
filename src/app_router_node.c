@@ -45,7 +45,9 @@ PRIVATE void APP_vBdbInit(void);
 PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent);
 PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent);
 PRIVATE void APP_vFactoryResetRecords(void);
+#if TRACE_APP
 PRIVATE void APP_vPrintAPSTable(void);
+#endif
 
 PRIVATE APP_teNodeState eNodeState;
 
