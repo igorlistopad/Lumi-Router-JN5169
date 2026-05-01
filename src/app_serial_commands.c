@@ -112,8 +112,10 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
                 DBG_vPrintf(TRACE_SERIAL, "APP_vProcessRxChar(%d, %d, %02x)\n", u16PacketType, u16PacketLength, u8CRC);
                 APP_vProcessCommand();
             }
+            else {
+                DBG_vPrintf(TRACE_SERIAL, "CRC BAD\n");
+            }
         }
-        DBG_vPrintf(TRACE_SERIAL, "CRC BAD\n");
         break;
 
     default:
