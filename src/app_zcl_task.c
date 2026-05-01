@@ -228,7 +228,7 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
             &psEvent->uMessage.sAttributeReportingConfigurationRecord;
         DBG_vPrintf(
             TRACE_ZCL,
-            "Individual Configure Report Cluster %d Attrib %d Type %d Min %d Max %d IntV %d Direcct %d Change %d\n",
+            "Individual Configure Report Cluster %d Attrib %d Type %d Min %d Max %d IntV %d Direct %d Change %d\n",
             psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum,
             psAttributeReportingRecord->u16AttributeEnum,
             psAttributeReportingRecord->eAttributeDataType,

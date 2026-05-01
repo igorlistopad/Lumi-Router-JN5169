@@ -303,7 +303,7 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
         break;
 
     case ZPS_EVENT_ZDO_UNBIND:
-        DBG_vPrintf(TRACE_APP, "APP-ZDO: Zdo Unbiind Event\n");
+        DBG_vPrintf(TRACE_APP, "APP-ZDO: Zdo Unbind Event\n");
         break;
 
     case ZPS_EVENT_ZDO_LINK_KEY:
