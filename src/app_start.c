@@ -1,16 +1,7 @@
-/****************************************************************************
- *
- * MODULE:              Lumi Router
- *
- * COMPONENT:           app_start.c
- *
- * DESCRIPTION:         Router Initialisation
- *
- ****************************************************************************/
-
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
+/**
+ * @file  app_start.c
+ * @brief Router Initialisation
+ */
 
 #include <jendefs.h>
 
@@ -32,51 +23,21 @@
 #include "pwrm.h"
 #include "zps_nwk_pub.h"
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
 #ifdef DEBUG_APP
 #define TRACE_APP TRUE
 #else
 #define TRACE_APP FALSE
 #endif
 
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Function Prototypes                                     ***/
-/****************************************************************************/
-
 PRIVATE void APP_vInitialise(void);
 PRIVATE void vfExtendedStatusCallBack(ZPS_teExtendedStatus eExtendedStatus);
 
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
 extern void *_stack_low_water_mark;
 
-/****************************************************************************/
-/***        Local Variables                                               ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: vAppMain
- *
- * DESCRIPTION:
- * Entry point for application from a cold start.
- * ---
- * Called in SDK JN-SW-4170
- *
- ****************************************************************************/
+/**
+ * @brief Entry point for application from a cold start.
+ * @note  Called in SDK JN-SW-4170
+ */
 PUBLIC void vAppMain(void)
 {
     /* Wait until FALSE i.e. on XTAL - otherwise UART data will be at wrong speed */
@@ -133,34 +94,19 @@ PUBLIC void vAppMain(void)
     APP_vMainLoop();
 }
 
-/****************************************************************************
- *
- * NAME: vAppRegisterPWRMCallbacks
- *
- * DESCRIPTION:
- * Power manager callback.
- * Called to allow the application to register sleep and wake callbacks.
- * ---
- * Called in SDK JN-SW-4170
- *
- ****************************************************************************/
+/**
+ * @brief   Power manager callback.
+ * @details Called to allow the application to register sleep and wake callbacks.
+ * @note    Called in SDK JN-SW-4170
+ */
 PUBLIC void vAppRegisterPWRMCallbacks(void)
 {
     /* nothing to register as device does not sleep */
 }
 
-/****************************************************************************/
-/***        Local Functions                                               ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_vInitialise
- *
- * DESCRIPTION:
- * Initialises Zigbee stack, hardware and application.
- *
- ****************************************************************************/
+/**
+ * @brief Initialises Zigbee stack, hardware and application.
+ */
 PRIVATE void APP_vInitialise(void)
 {
     /* Initialise Power Manager even on non-sleeping nodes as it allows the
@@ -182,19 +128,10 @@ PRIVATE void APP_vInitialise(void)
     APP_vInitialiseRouter();
 }
 
-/****************************************************************************
- *
- * NAME: vfExtendedStatusCallBack
- *
- * DESCRIPTION:
- * Callback from stack on extended error situations.
- *
- ****************************************************************************/
+/**
+ * @brief Callback from stack on extended error situations.
+ */
 PRIVATE void vfExtendedStatusCallBack(ZPS_teExtendedStatus eExtendedStatus)
 {
     DBG_vPrintf(TRACE_APP, "ERROR: Extended status 0x%02x\n", eExtendedStatus);
 }
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/

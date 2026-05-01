@@ -1,16 +1,7 @@
-/****************************************************************************
- *
- * MODULE:              Lumi Router
- *
- * COMPONENT:           app_reporting.c
- *
- * DESCRIPTION:         Reporting functionality
- *
- ****************************************************************************/
-
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
+/**
+ * @file  app_reporting.c
+ * @brief Reporting functionality
+ */
 
 #include <jendefs.h>
 #include <string.h>
@@ -30,10 +21,6 @@
 #include "zcl.h"
 #include "zcl_common.h"
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
 #ifdef DEBUG_REPORT
 #define TRACE_REPORT TRUE
 #else
@@ -42,28 +29,12 @@
 
 #define DEVICE_TEMPERATURE_MINIMUM_REPORTABLE_CHANGE 0x01
 
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
-
 typedef struct {
     uint16 u16ClusterID;
     tsZCL_AttributeReportingConfigurationRecord sAttributeReportingConfigurationRecord;
 } APP_tsReports;
 
-/****************************************************************************/
-/***        Local Function Prototypes                                     ***/
-/****************************************************************************/
-
 PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum);
-
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Variables                                               ***/
-/****************************************************************************/
 
 /* Just Two reports for time being */
 PRIVATE APP_tsReports asSavedReports[ZCL_NUMBER_OF_REPORTS];
@@ -84,18 +55,9 @@ PRIVATE APP_tsReports asDefaultReports[ZCL_NUMBER_OF_REPORTS] = {
     },
 };
 
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_eRestoreReports
- *
- * DESCRIPTION:
- * Loads the reporting information from the EEPROM/PDM
- *
- ****************************************************************************/
+/**
+ * @brief Loads the reporting information from the EEPROM/PDM
+ */
 PUBLIC PDM_teStatus APP_eRestoreReports(void)
 {
     /* Restore any report data that is previously saved to flash */
@@ -109,14 +71,9 @@ PUBLIC PDM_teStatus APP_eRestoreReports(void)
     return (eStatusReportReload);
 }
 
-/****************************************************************************
- *
- * NAME: APP_vMakeSupportedAttributesReportable
- *
- * DESCRIPTION:
- * Makes the attributes reportable
- *
- ****************************************************************************/
+/**
+ * @brief Makes the attributes reportable
+ */
 PUBLIC void APP_vMakeSupportedAttributesReportable(void)
 {
     int i;
@@ -149,14 +106,9 @@ PUBLIC void APP_vMakeSupportedAttributesReportable(void)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_vLoadDefaultConfigForReportable
- *
- * DESCRIPTION:
- * Loads a default configuration
- *
- ****************************************************************************/
+/**
+ * @brief Loads a default configuration
+ */
 PUBLIC void APP_vLoadDefaultConfigForReportable(void)
 {
     int i;
@@ -184,14 +136,9 @@ PUBLIC void APP_vLoadDefaultConfigForReportable(void)
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 
-/****************************************************************************
- *
- * NAME: APP_vSaveReportableRecord
- *
- * DESCRIPTION:
- * Save reportable record
- *
- ****************************************************************************/
+/**
+ * @brief Save reportable record
+ */
 PUBLIC void
 APP_vSaveReportableRecord(uint16 u16ClusterID,
                           tsZCL_AttributeReportingConfigurationRecord *psAttributeReportingConfigurationRecord)
@@ -226,14 +173,9 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 
-/****************************************************************************
- *
- * NAME: APP_vRestoreDefaultRecord
- *
- * DESCRIPTION:
- * Restore Default Record
- *
- ****************************************************************************/
+/**
+ * @brief Restore Default Record
+ */
 PUBLIC void
 APP_vRestoreDefaultRecord(uint8 u8EndPointID,
                           uint16 u16ClusterID,
@@ -273,21 +215,9 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 
-/****************************************************************************/
-/***        Local Functions                                               ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_u8GetRecordIndex
- *
- * DESCRIPTION:
- * Get record index
- *
- * RETURNS:
- * Record index
- *
- ****************************************************************************/
+/**
+ * @brief Get record index
+ */
 PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
 {
     uint8 u8Index = 0xFF;
@@ -298,7 +228,3 @@ PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
 
     return u8Index;
 }
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/

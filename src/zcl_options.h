@@ -1,32 +1,16 @@
-/****************************************************************************
- *
- * MODULE:              Lumi Router
- *
- * COMPONENT:           zcl_options.h
- *
- * DESCRIPTION:         Options Header for ZigBee Cluster Library functions
- *
- ****************************************************************************/
+/**
+ * @file  zcl_options.h
+ * @brief Options Header for ZigBee Cluster Library functions
+ */
 
 #ifndef ZCL_OPTIONS_H
 #define ZCL_OPTIONS_H
 
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
-
 #include <jendefs.h>
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/*                      ZCL Specific initialization                         */
-/****************************************************************************/
-/* This is the NXP manufacturer code.If creating new a manufacturer         */
-/* specific command apply to the Zigbee alliance for an Id for your company */
-/* Also update the manufacturer code in .zpscfg: Node Descriptor->misc      */
+/**
+ * @brief ZCL Specific initialization 
+ */
 #define ZCL_MANUFACTURER_CODE 0x1037
 
 /* Number of endpoints supported by this device */
@@ -64,28 +48,22 @@ enum { REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT = 0, NUMBER_OF_REPORTS };
 /* Enable wild card profile */
 #define ZCL_ALLOW_WILD_CARD_PROFILE
 
-/****************************************************************************/
-/*                             Enable Cluster                               */
-/*                                                                          */
-/* Add the following #define's to your zcl_options.h file to enable         */
-/* cluster and their client or server instances                             */
-/****************************************************************************/
+/**
+ * @brief Enable Cluster
+ * @note  Enable cluster and their client or server instances
+ */
 #define CLD_BASIC
 #define BASIC_SERVER
 
 /* Fixing a build error
  * Due to an error in the SDK
- * JN-SW-4170/Components/ZCL/Devices/ZHA/Generic/Source/plug_control.c:157
- */
-// #define CLD_DEVICE_TEMPERATURE_CONFIGURATION
+ * JN-SW-4170/Components/ZCL/Devices/ZHA/Generic/Source/plug_control.c:157 */
 #define DEVICE_TEMPERATURE_CONFIGURATION_SERVER
 
-/****************************************************************************/
-/*             Basic Cluster - Optional Attributes                          */
-/*                                                                          */
-/* Add the following #define's to your zcl_options.h file to add optional   */
-/* attributes to the basic cluster.                                         */
-/****************************************************************************/
+/**
+ * @brief Basic Cluster
+ * @note  Optional Attributes
+ */
 #define CLD_BAS_ATTR_APPLICATION_VERSION
 #define CLD_BAS_ATTR_STACK_VERSION
 #define CLD_BAS_ATTR_HARDWARE_VERSION
@@ -109,28 +87,5 @@ enum { REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT = 0, NUMBER_OF_REPORTS };
 #define CLD_BAS_SW_BUILD_SIZE    (9)
 
 #define CLD_BAS_CMD_RESET_TO_FACTORY_DEFAULTS
-
-/****************************************************************************/
-/*      Device Temperature Configuration Cluster - Optional Attributes      */
-/*                                                                          */
-/* Add the following #define's to your zcl_options.h file to add optional   */
-/* attributes to the time cluster.                                          */
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/
 
 #endif /* ZCL_OPTIONS_H */

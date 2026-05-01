@@ -1,16 +1,7 @@
-/****************************************************************************
- *
- * MODULE:              Lumi Router
- *
- * COMPONENT:           app_router_node.c
- *
- * DESCRIPTION:         Router application
- *
- ****************************************************************************/
-
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
+/**
+ * @file  app_router_node.c
+ * @brief Router application
+ */
 
 #include <jendefs.h>
 
@@ -42,25 +33,13 @@
 #include "zps_apl_zdo.h"
 #include "zps_nwk_nib.h"
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
 #ifdef DEBUG_APP
 #define TRACE_APP TRUE
 #else
 #define TRACE_APP FALSE
 #endif
 
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
-
 typedef enum { E_STARTUP, E_RUNNING } APP_teNodeState;
-
-/****************************************************************************/
-/***        Local Function Prototypes                                     ***/
-/****************************************************************************/
 
 PRIVATE void APP_vBdbInit(void);
 PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent);
@@ -68,33 +47,16 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent);
 PRIVATE void APP_vFactoryResetRecords(void);
 PRIVATE void APP_vPrintAPSTable(void);
 
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Variables                                               ***/
-/****************************************************************************/
-
 PRIVATE APP_teNodeState eNodeState;
-
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
 
 #ifdef PDM_EEPROM
 extern uint8 u8PDM_CalculateFileSystemCapacity();
 extern uint8 u8PDM_GetFileSystemOccupancy();
 #endif
 
-/****************************************************************************
- *
- * NAME: APP_vInitialiseRouter
- *
- * DESCRIPTION:
- * Initialises the application related functions
- *
- ****************************************************************************/
+/**
+ * @brief Initialises the application related functions
+ */
 PUBLIC void APP_vInitialiseRouter(void)
 {
     uint16 u16ByteRead;
@@ -145,29 +107,18 @@ PUBLIC void APP_vInitialiseRouter(void)
     APP_WriteMessageToSerial("Router started..");
 }
 
-/****************************************************************************
- *
- * NAME: APP_cbTimerRestart
- *
- * DESCRIPTION:
- * CallBack For Restart
- *
- ****************************************************************************/
+/**
+ * @brief CallBack For Restart
+ */
 PUBLIC void APP_cbTimerRestart(void *pvParam)
 {
     vAHI_SwReset();
 }
 
-/****************************************************************************
- *
- * NAME: APP_vBdbCallback
- *
- * DESCRIPTION:
- * Callback from the BDB
- * ---
- * Called in SDK JN-SW-4170
- *
- ****************************************************************************/
+/**
+ * @brief Callback from the BDB
+ * @note  Called in SDK JN-SW-4170
+ */
 PUBLIC void APP_vBdbCallback(BDB_tsBdbEvent *psBdbEvent)
 {
     BDB_teStatus eStatus;
@@ -208,18 +159,9 @@ PUBLIC void APP_vBdbCallback(BDB_tsBdbEvent *psBdbEvent)
     }
 }
 
-/****************************************************************************/
-/***        Local Functions                                               ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_vBdbInit
- *
- * DESCRIPTION:
- * Function to initialize BDB attributes and message queue
- *
- ****************************************************************************/
+/**
+ * @brief Function to initialize BDB attributes and message queue
+ */
 PRIVATE void APP_vBdbInit(void)
 {
     BDB_tsInitArgs sInitArgs;
@@ -229,14 +171,9 @@ PRIVATE void APP_vBdbInit(void)
     BDB_vInit(&sInitArgs);
 }
 
-/****************************************************************************
- *
- * NAME: APP_vHandleAfEvents
- *
- * DESCRIPTION:
- * Application handler for stack events
- *
- ****************************************************************************/
+/**
+ * @brief Application handler for stack events
+ */
 PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
 {
     if (psZpsAfEvent->u8EndPoint == LUMIROUTER_APPLICATION_ENDPOINT) {
@@ -258,14 +195,9 @@ PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_vHandleZdoEvents
- *
- * DESCRIPTION:
- * Application handler for stack events for end point 0 (ZDO)
- *
- ****************************************************************************/
+/**
+ * @brief Application handler for stack events for end point 0 (ZDO)
+ */
 PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
 {
     ZPS_tsAfEvent *psAfEvent = &(psZpsAfEvent->sStackEvent);
@@ -397,14 +329,9 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_vFactoryResetRecords
- *
- * DESCRIPTION:
- * Resets persisted data structures to factory new state
- *
- ****************************************************************************/
+/**
+ * @brief Resets persisted data structures to factory new state
+ */
 PRIVATE void APP_vFactoryResetRecords(void)
 {
     /* clear out the stack */
@@ -419,14 +346,9 @@ PRIVATE void APP_vFactoryResetRecords(void)
 }
 
 #if TRACE_APP
-/****************************************************************************
- *
- * NAME: APP_vPrintAPSTable
- *
- * DESCRIPTION:
- * Prints the content of APS table
- *
- ****************************************************************************/
+/**
+ * @brief Prints the content of APS table
+ */
 PRIVATE void APP_vPrintAPSTable(void)
 {
     uint8 i;
@@ -455,7 +377,3 @@ PRIVATE void APP_vPrintAPSTable(void)
     }
 }
 #endif
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/

@@ -1,16 +1,7 @@
-/****************************************************************************
- *
- * MODULE:              Lumi Router
- *
- * COMPONENT:           app_serial_commands.c
- *
- * DESCRIPTION:         Serial Commands
- *
- ****************************************************************************/
-
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
+/**
+ * @file  app_serial_commands.c
+ * @brief Serial Commands
+ */
 
 #include <jendefs.h>
 
@@ -26,25 +17,16 @@
 #include "dbg.h"
 #include "portmacro.h"
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
 #ifdef DEBUG_SERIAL
 #define TRACE_SERIAL TRUE
 #else
 #define TRACE_SERIAL FALSE
 #endif
 
-#define SL_START_CHAR 0x01
-#define SL_ESC_CHAR   0x02
-#define SL_END_CHAR   0x03
-
+#define SL_START_CHAR   0x01
+#define SL_ESC_CHAR     0x02
+#define SL_END_CHAR     0x03
 #define MAX_PACKET_SIZE 32
-
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
 
 /* Enumerated list of states for receive state machine */
 typedef enum {
@@ -60,40 +42,19 @@ typedef enum {
 /* Serial link message types */
 typedef enum { E_SC_MSG_RESET = 0x0011, E_SC_MSG_ERASE_PERSISTENT_DATA = 0x0012 };
 
-/****************************************************************************/
-/***        Local Function Prototypes                                     ***/
-/****************************************************************************/
-
 PRIVATE void APP_vProcessRxChar(uint8 u8Char);
 PRIVATE void APP_vProcessCommand(void);
 PRIVATE void APP_vWriteTxChar(uint8 u8Char);
 PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Data);
-
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Variables                                               ***/
-/****************************************************************************/
 
 PRIVATE uint8 au8LinkRxBuffer[32];
 PRIVATE uint16 u16PacketType;
 PRIVATE uint16 u16PacketLength;
 PRIVATE uint32 sStorage;
 
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_taskAtSerial
- *
- * DESCRIPTION:
- * Task that obtains a message from the serial Rx message queue.
- *
- ****************************************************************************/
+/**
+ * @brief Task that obtains a message from the serial Rx message queue.
+ */
 PUBLIC void APP_taskAtSerial(void)
 {
     uint8 u8RxByte;
@@ -102,14 +63,9 @@ PUBLIC void APP_taskAtSerial(void)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_WriteMessageToSerial
- *
- * DESCRIPTION:
- * Write message to the serial link
- *
- ****************************************************************************/
+/**
+ * @brief Write message to the serial link
+ */
 PUBLIC void APP_WriteMessageToSerial(const char *message)
 {
     DBG_vPrintf(TRACE_SERIAL, "APP_WriteMessageToSerial(%s)\n", message);
@@ -119,18 +75,9 @@ PUBLIC void APP_WriteMessageToSerial(const char *message)
     }
 }
 
-/****************************************************************************/
-/***        Local Functions                                               ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_vProcessRxChar
- *
- * DESCRIPTION:
- * Processes the received character
- *
- ****************************************************************************/
+/**
+ * @brief Processes the received character
+ */
 PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 {
     static APP_teRxState eRxState = E_STATE_RX_WAIT_START;
@@ -223,14 +170,9 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_vProcessCommand
- *
- * DESCRIPTION:
- * Processed the received command
- *
- ****************************************************************************/
+/**
+ * @brief Processed the received command
+ */
 PRIVATE void APP_vProcessCommand(void)
 {
     switch (u16PacketType) {
@@ -251,14 +193,9 @@ PRIVATE void APP_vProcessCommand(void)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_vWriteTxChar
- *
- * DESCRIPTION:
- * Write byte to the serial link
- *
- ****************************************************************************/
+/**
+ * @brief Write byte to the serial link
+ */
 PRIVATE void APP_vWriteTxChar(uint8 u8Char)
 {
     ZPS_eEnterCriticalSection(NULL, &sStorage);
@@ -275,22 +212,9 @@ PRIVATE void APP_vWriteTxChar(uint8 u8Char)
     ZPS_eExitCriticalSection(NULL, &sStorage);
 }
 
-/****************************************************************************
- *
- * NAME: APP_u8CalculateCRC
- *
- * DESCRIPTION:
- * Calculate CRC of packet
- *
- * PARAMETERS: Name                   RW  Usage
- *             u8Type                 R   Message type
- *             u16Length              R   Message length
- *             pu8Data                R   Message payload
- *
- * RETURNS:
- * CRC of packet
- *
- ****************************************************************************/
+/**
+ * @brief Calculate CRC of packet
+ */
 PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Data)
 {
     int n;
@@ -307,7 +231,3 @@ PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Dat
 
     return (u8CRC);
 }
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/

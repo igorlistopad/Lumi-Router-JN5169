@@ -1,16 +1,7 @@
-/****************************************************************************
- *
- * MODULE:              Lumi Router
- *
- * COMPONENT:           app_zcl_task.c
- *
- * DESCRIPTION:         ZCL Interface
- *
- ****************************************************************************/
-
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
+/**
+ * @file  app_zcl_task.c
+ * @brief ZCL Interface
+ */
 
 #include <jendefs.h>
 #include <string.h>
@@ -32,10 +23,6 @@
 #include "dbg.h"
 #include "zcl.h"
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
 #ifdef DEBUG_ZCL
 #define TRACE_ZCL TRUE
 #else
@@ -44,14 +31,6 @@
 
 #define ZCL_TICK_TIME ZTIMER_TIME_SEC(1)
 
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Function Prototypes                                     ***/
-/****************************************************************************/
-
 PRIVATE void APP_ZCL_vTick(void);
 PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent);
 PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent);
@@ -59,28 +38,11 @@ PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent);
 PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCallBack, APP_tsLumiRouter *psDeviceInfo);
 PRIVATE void APP_ZCL_vDeviceSpecific_Init(void);
 
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
 PUBLIC APP_tsLumiRouter sLumiRouter;
 
-/****************************************************************************/
-/***        Local Variables                                               ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_ZCL_vInitialise
- *
- * DESCRIPTION:
- * Initialises ZCL related functions
- *
- ****************************************************************************/
+/**
+ * @brief Initialises ZCL related functions
+ */
 PUBLIC void APP_ZCL_vInitialise(void)
 {
     teZCL_Status eZCL_Status;
@@ -103,14 +65,9 @@ PUBLIC void APP_ZCL_vInitialise(void)
     APP_ZCL_vDeviceSpecific_Init();
 }
 
-/****************************************************************************
- *
- * NAME: APP_ZCL_vEventHandler
- *
- * DESCRIPTION:
- * Main ZCL processing task
- *
- ****************************************************************************/
+/**
+ * @brief Main ZCL processing task
+ */
 PUBLIC void APP_ZCL_vEventHandler(ZPS_tsAfEvent *psStackEvent)
 {
     tsZCL_CallBackEvent sCallBackEvent;
@@ -121,14 +78,9 @@ PUBLIC void APP_ZCL_vEventHandler(ZPS_tsAfEvent *psStackEvent)
     vZCL_EventHandler(&sCallBackEvent);
 }
 
-/****************************************************************************
- *
- * NAME: APP_cbTimerZclTick
- *
- * DESCRIPTION:
- * CallBack For ZCL Tick timer
- *
- ****************************************************************************/
+/**
+ * @brief CallBack For ZCL Tick timer
+ */
 PUBLIC void APP_cbTimerZclTick(void *pvParam)
 {
     /*
@@ -139,18 +91,9 @@ PUBLIC void APP_cbTimerZclTick(void *pvParam)
     ZTIMER_eStart(u8TimerTick, ZCL_TICK_TIME);
 }
 
-/****************************************************************************/
-/***        Local Functions                                               ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: APP_ZCL_vTick
- *
- * DESCRIPTION:
- * ZCL Tick
- *
- ****************************************************************************/
+/**
+ * @brief ZCL Tick
+ */
 PRIVATE void APP_ZCL_vTick(void)
 {
     tsZCL_CallBackEvent sCallBackEvent;
@@ -160,14 +103,9 @@ PRIVATE void APP_ZCL_vTick(void)
     vZCL_EventHandler(&sCallBackEvent);
 }
 
-/****************************************************************************
- *
- * NAME: APP_ZCL_cbGeneralCallback
- *
- * DESCRIPTION:
- * General callback for ZCL events
- *
- ****************************************************************************/
+/**
+ * @brief General callback for ZCL events
+ */
 PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent)
 {
     switch (psEvent->eEventType) {
@@ -217,14 +155,9 @@ PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_ZCL_cbEndpointCallback
- *
- * DESCRIPTION:
- * Endpoint specific callback for ZCL events
- *
- ****************************************************************************/
+/**
+ * @brief Endpoint specific callback for ZCL events
+ */
 PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
 {
 
@@ -329,14 +262,9 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_ZCL_vHandleClusterCustomCommands
- *
- * DESCRIPTION:
- * callback for ZCL cluster custom command events
- *
- ****************************************************************************/
+/**
+ * @brief Callback for ZCL cluster custom command events
+ */
 PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent)
 {
     if (psEvent->uMessage.sClusterCustomMessage.u16ClusterId == GENERAL_CLUSTER_ID_BASIC) {
@@ -351,22 +279,9 @@ PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_ZCL_eRegisterEndPoint
- *
- * DESCRIPTION:
- * Register ZLO endpoints
- *
- * PARAMETERS:  Name                            Usage
- *              cbCallBack                      Pointer to endpoint callback
- *              psDeviceInfo                    Pointer to struct containing
- *                                              data for endpoint
- *
- * RETURNS:
- * teZCL_Status
- *
- ****************************************************************************/
+/**
+ * @brief Register ZLO endpoints
+ */
 PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCallBack, APP_tsLumiRouter *psDeviceInfo)
 {
     /* Fill in end point details */
@@ -400,14 +315,9 @@ PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCall
     return eZCL_Register(&psDeviceInfo->sEndPoint);
 }
 
-/****************************************************************************
- *
- * NAME: APP_ZCL_vDeviceSpecific_Init
- *
- * DESCRIPTION:
- * ZCL specific initialization
- *
- ****************************************************************************/
+/**
+ * @brief ZCL specific initialization
+ */
 PRIVATE void APP_ZCL_vDeviceSpecific_Init(void)
 {
     memcpy(sLumiRouter.sBasicServerCluster.au8ManufacturerName, BAS_MANUF_NAME_STRING, CLD_BAS_MANUF_NAME_SIZE);
@@ -417,7 +327,3 @@ PRIVATE void APP_ZCL_vDeviceSpecific_Init(void)
 
     sLumiRouter.sDeviceTemperatureConfigurationServerCluster.i16CurrentTemperature = 0;
 }
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/

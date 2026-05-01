@@ -1,16 +1,7 @@
-/****************************************************************************
- *
- * MODULE:               Lumi Router
- *
- * COMPONENT:            app_main.c
- *
- * DESCRIPTION:          Application main file
- *
- ****************************************************************************/
-
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
+/**
+ * @file  app_main.c
+ * @brief Application main file
+ */
 
 #include <jendefs.h>
 
@@ -30,18 +21,13 @@
 #include "portmacro.h"
 #include "zps_apl_af.h"
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
 #ifdef DEBUG_APP
 #define TRACE_APP TRUE
 #else
 #define TRACE_APP FALSE
 #endif
 
-#define APP_ZTIMER_STORAGE 3
-
+#define APP_ZTIMER_STORAGE   3
 #define BDB_QUEUE_SIZE       2
 #define MLME_QUEQUE_SIZE     8
 #define MCPS_QUEUE_SIZE      20
@@ -50,33 +36,15 @@
 #define TX_QUEUE_SIZE        150
 #define RX_QUEUE_SIZE        150
 
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Function Prototypes                                     ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
 PUBLIC uint8 u8TimerTick;
 PUBLIC uint8 u8TimerRestart;
 PUBLIC uint8 u8TimerDeviceTemperature;
-
 PUBLIC tszQueue APP_msgBdbEvents;
 PUBLIC tszQueue APP_msgAppEvents;
 PUBLIC tszQueue APP_msgSerialTx;
 PUBLIC tszQueue APP_msgSerialRx;
 
-/****************************************************************************/
-/***        Local Variables                                               ***/
-/****************************************************************************/
-
 PRIVATE ZTIMER_tsTimer asTimers[APP_ZTIMER_STORAGE + BDB_ZTIMER_STORAGE];
-
 PRIVATE BDB_tsZpsAfEvent asBdbEvent[BDB_QUEUE_SIZE];
 PRIVATE MAC_tsMlmeVsDcfmInd asMacMlmeVsDcfmInd[MLME_QUEQUE_SIZE];
 PRIVATE MAC_tsMcpsVsDcfmInd asMacMcpsDcfmInd[MCPS_QUEUE_SIZE];
@@ -85,21 +53,12 @@ PRIVATE MAC_tsMcpsVsCfmData asMacMcpsDcfm[MCPS_DCFM_QUEUE_SIZE];
 PRIVATE uint8 au8TxBuffer[TX_QUEUE_SIZE];
 PRIVATE uint8 au8RxBuffer[RX_QUEUE_SIZE];
 
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
-
 extern void zps_taskZPS(void);
 extern void PWRM_vManagePower(void);
 
-/****************************************************************************
- *
- * NAME: APP_vMainLoop
- *
- * DESCRIPTION:
- * Main application loop
- *
- ****************************************************************************/
+/**
+ * @brief Main application loop
+ */
 PUBLIC void APP_vMainLoop(void)
 {
     while (TRUE) {
@@ -123,14 +82,9 @@ PUBLIC void APP_vMainLoop(void)
     }
 }
 
-/****************************************************************************
- *
- * NAME: APP_vSetUpHardware
- *
- * DESCRIPTION:
- * Set up interrupts
- *
- ****************************************************************************/
+/**
+ * @brief Set up interrupts
+ */
 PUBLIC void APP_vSetUpHardware(void)
 {
     TARGET_INITIALISE();
@@ -139,14 +93,9 @@ PUBLIC void APP_vSetUpHardware(void)
     portENABLE_INTERRUPTS();
 }
 
-/****************************************************************************
- *
- * NAME: APP_vInitResources
- *
- * DESCRIPTION:
- * Initialise resources (timers, queue's etc)
- *
- ****************************************************************************/
+/**
+ * @brief Initialise resources (timers, queue's etc)
+ */
 PUBLIC void APP_vInitResources(void)
 {
     /* Initialise the Z timer module */
@@ -166,11 +115,3 @@ PUBLIC void APP_vInitResources(void)
     ZQ_vQueueCreate(&APP_msgSerialTx, TX_QUEUE_SIZE, sizeof(uint8), (uint8 *)au8TxBuffer);
     ZQ_vQueueCreate(&APP_msgSerialRx, RX_QUEUE_SIZE, sizeof(uint8), (uint8 *)au8RxBuffer);
 }
-
-/****************************************************************************/
-/***        Local Functions                                               ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/

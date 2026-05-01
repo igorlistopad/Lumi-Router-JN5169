@@ -1,16 +1,7 @@
-/****************************************************************************
- *
- * MODULE:              Lumi Router
- *
- * COMPONENT:           app_uart.c
- *
- * DESCRIPTION:         UART interface
- *
- ****************************************************************************/
-
-/****************************************************************************/
-/***        Include Files                                                 ***/
-/****************************************************************************/
+/**
+ * @file  app_uart.c
+ * @brief UART interface
+ */
 
 #include <jendefs.h>
 #include <stdlib.h>
@@ -24,10 +15,6 @@
 #include "ZQueue.h"
 #include "dbg.h"
 
-/****************************************************************************/
-/***        Macro Definitions                                             ***/
-/****************************************************************************/
-
 #ifdef DEBUG_UART
 #define TRACE_UART TRUE
 #else
@@ -38,39 +25,14 @@
 #define UART_BAUD_RATE 115200
 #define UART_START_ADR 0x02003000UL
 
-/****************************************************************************/
-/***        Type Definitions                                              ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Function Prototypes                                     ***/
-/****************************************************************************/
-
 PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate);
-
-/****************************************************************************/
-/***        Exported Variables                                            ***/
-/****************************************************************************/
-
-/****************************************************************************/
-/***        Local Variables                                               ***/
-/****************************************************************************/
 
 PRIVATE uint8 txbuf[16];
 PRIVATE uint8 rxbuf[127];
 
-/****************************************************************************/
-/***        Exported Functions                                            ***/
-/****************************************************************************/
-
-/****************************************************************************
- *
- * NAME: UART_vInit
- *
- * DESCRIPTION:
- * Initialising UART
- *
- ****************************************************************************/
+/**
+ * @brief Initialising UART
+ */
 PUBLIC void UART_vInit(void)
 {
     DBG_vPrintf(TRACE_UART, "Initialising UART... ");
@@ -92,14 +54,9 @@ PUBLIC void UART_vInit(void)
     DBG_vPrintf(TRACE_UART, "Done\n");
 }
 
-/****************************************************************************
- *
- * NAME: APP_isrUart
- *
- * DESCRIPTION:
- * Handle interrupts from uart
- *
- ****************************************************************************/
+/**
+ * @brief Handle interrupts from uart
+ */
 PUBLIC void APP_isrUart(void)
 {
     uint32 u32ItemBitmap = ((*((volatile uint32 *)(UART_START_ADR + 0x08))) >> 1) & 0x0007;
@@ -121,66 +78,41 @@ PUBLIC void APP_isrUart(void)
     }
 }
 
-/****************************************************************************
- *
- * NAME: UART_vTxChar
- *
- * DESCRIPTION:
- * Set UART RS-232 RTS line low to allow further data
- *
- ****************************************************************************/
+/**
+ * @brief Set UART RS-232 RTS line low to allow further data
+ */
 PUBLIC void UART_vTxChar(uint8 u8Char)
 {
     vAHI_UartWriteData(UART, u8Char);
 }
 
-/****************************************************************************
- *
- * NAME: UART_bTxReady
- *
- * DESCRIPTION:
- * Set UART RS-232 RTS line low to allow further data
- *
- ****************************************************************************/
+/**
+ * @brief Set UART RS-232 RTS line low to allow further data
+ */
 PUBLIC bool_t UART_bTxReady()
 {
     return u8AHI_UartReadLineStatus(UART) & E_AHI_UART_LS_THRE;
 }
 
-/****************************************************************************
- *
- * NAME: UART_vSetTxInterrupt
- *
- * DESCRIPTION:
- * Enable / disable the tx interrupt
- *
- ****************************************************************************/
+/**
+ * @brief Enable / disable the tx interrupt
+ */
 PUBLIC void UART_vSetTxInterrupt(bool_t bState)
 {
     vAHI_UartSetInterrupt(UART, FALSE, FALSE, bState, TRUE, E_AHI_UART_FIFO_LEVEL_1);
 }
 
-/****************************************************************************
- *
- * NAME: UART_vRtsStartFlow
- *
- * DESCRIPTION:
- * Set UART RS-232 RTS line low to allow further data
- *
- ****************************************************************************/
+/**
+ * @brief Set UART RS-232 RTS line low to allow further data
+ */
 PUBLIC void UART_vRtsStartFlow(void)
 {
     vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, E_AHI_UART_RTS_LOW);
 }
 
-/****************************************************************************
- *
- * NAME: UART_vRtsStopFlow
- *
- * DESCRIPTION:
- * Set UART RS-232 RTS line high to stop any further data coming in
- *
- ****************************************************************************/
+/**
+ * @brief Set UART RS-232 RTS line high to stop any further data coming in
+ */
 PUBLIC void UART_vRtsStopFlow(void)
 {
     vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, E_AHI_UART_RTS_HIGH);
@@ -190,14 +122,9 @@ PUBLIC void UART_vRtsStopFlow(void)
 /***        Local Functions                                               ***/
 /****************************************************************************/
 
-/****************************************************************************
- *
- * NAME: UART_vSetBaudRate
- *
- * DESCRIPTION:
- * Set baud rates UART
- *
- ****************************************************************************/
+/**
+ * @brief Set baud rates UART
+ */
 PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate)
 {
     uint16 u16Divisor = 0;
@@ -232,7 +159,3 @@ PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate)
     /* Set the calculated divisor */
     vAHI_UartSetBaudDivisor(UART, u16Divisor);
 }
-
-/****************************************************************************/
-/***        END OF FILE                                                   ***/
-/****************************************************************************/
