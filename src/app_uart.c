@@ -44,7 +44,7 @@ PUBLIC void UART_vInit(void)
     vAHI_UartReset(UART, TRUE, TRUE);
     vAHI_UartReset(UART, FALSE, FALSE);
 
-    /* Set the clock divisor register to give required buad, this has to be done
+    /* Set the clock divisor register to give required baud, this has to be done
        directly as the normal routines (in ROM) do not support all baud rates */
     UART_vSetBaudRate(UART_BAUD_RATE);
 
@@ -79,7 +79,7 @@ PUBLIC void APP_isrUart(void)
 }
 
 /**
- * @brief Set UART RS-232 RTS line low to allow further data
+ * @brief Send the character
  */
 PUBLIC void UART_vTxChar(uint8 u8Char)
 {
@@ -87,7 +87,7 @@ PUBLIC void UART_vTxChar(uint8 u8Char)
 }
 
 /**
- * @brief Set UART RS-232 RTS line low to allow further data
+ * @brief Read line status
  */
 PUBLIC bool_t UART_bTxReady()
 {

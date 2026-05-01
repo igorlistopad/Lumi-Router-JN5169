@@ -19,7 +19,7 @@
 /* ZCL has all cooperative task */
 #define COOPERATIVE
 
-/* Set this Tue to disable non error default responses from clusters */
+/* Set this True to disable non error default responses from clusters */
 #define ZCL_DISABLE_DEFAULT_RESPONSES (TRUE)
 #define ZCL_DISABLE_APS_ACK           (TRUE)
 

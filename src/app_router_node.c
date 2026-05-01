@@ -263,7 +263,7 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
                     psAfEvent->uEvent.sNwkLeaveIndicationEvent.u8Rejoin);
         if ((psAfEvent->uEvent.sNwkLeaveIndicationEvent.u64ExtAddr == 0UL) &&
             (psAfEvent->uEvent.sNwkLeaveIndicationEvent.u8Rejoin == 0)) {
-            /* We sare asked to Leave without rejoin */
+            /* We are asked to Leave without rejoin */
             DBG_vPrintf(TRACE_APP, "LEAVE IND -> For Us No Rejoin\n");
             APP_vFactoryResetRecords();
             vAHI_SwReset();
