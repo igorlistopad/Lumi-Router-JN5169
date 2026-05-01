@@ -24,11 +24,13 @@
 #define UART           E_AHI_UART_0
 #define UART_BAUD_RATE 115200
 #define UART_START_ADR 0x02003000UL
+#define MAX_TX_BUFFER  16
+#define MAX_RX_BUFFER  255
 
 PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate);
 
-PRIVATE uint8 txbuf[16];
-PRIVATE uint8 rxbuf[127];
+PRIVATE uint8 au8TxBuffer[MAX_TX_BUFFER];
+PRIVATE uint8 au8RxBuffer[MAX_RX_BUFFER];
 
 /**
  * @brief Initialising UART
@@ -39,7 +41,7 @@ PUBLIC void UART_vInit(void)
 
     vAHI_UartSetRTSCTS(UART, FALSE);
 
-    bAHI_UartEnable(UART, txbuf, (uint8)16, rxbuf, (uint8)127);
+    bAHI_UartEnable(UART, au8TxBuffer, MAX_TX_BUFFER, au8TxBuffer, MAX_RX_BUFFER);
 
     vAHI_UartReset(UART, TRUE, TRUE);
     vAHI_UartReset(UART, FALSE, FALSE);
@@ -64,7 +66,11 @@ PUBLIC void APP_isrUart(void)
 
     if (u32ItemBitmap & E_AHI_UART_INT_RXDATA) {
         u8Byte = u8AHI_UartReadData(UART);
-        ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte);
+        if (!ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte)) {
+            /* Queue full - assert RTS to stop sender and drain HW FIFO */
+            UART_vRtsStopFlow();
+            u8AHI_UartReadData(UART);
+        }
     }
     else if (u32ItemBitmap & E_AHI_UART_INT_TX) {
         if (ZQ_bQueueReceive(&APP_msgSerialTx, &u8Byte)) {
