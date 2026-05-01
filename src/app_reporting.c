@@ -96,7 +96,7 @@ PUBLIC void APP_vMakeSupportedAttributesReportable(void)
             asSavedReports[i].sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
             asSavedReports[i].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
             asSavedReports[i].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint8ReportableChange);
+            asSavedReports[i].sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
         eZCL_SetReportableFlag(LUMIROUTER_APPLICATION_ENDPOINT, u16ClusterId, TRUE, FALSE, u16AttributeEnum);
         eZCL_CreateLocalReport(LUMIROUTER_APPLICATION_ENDPOINT,
                                u16ClusterId,
@@ -129,7 +129,7 @@ PUBLIC void APP_vLoadDefaultConfigForReportable(void)
             asSavedReports[i].sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
             asSavedReports[i].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
             asSavedReports[i].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.uAttributeReportableChange.zuint8ReportableChange);
+            asSavedReports[i].sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
     }
 
     /* Save this Records */
@@ -167,7 +167,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
                 asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
                 asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
                 asSavedReports[u8Index]
-                    .sAttributeReportingConfigurationRecord.uAttributeReportableChange.zuint8ReportableChange);
+                    .sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
 
     /* Save this Records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
@@ -209,7 +209,7 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
                 asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
                 asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
                 asSavedReports[u8Index]
-                    .sAttributeReportingConfigurationRecord.uAttributeReportableChange.zuint8ReportableChange);
+                    .sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
 
     /* Save this Records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
