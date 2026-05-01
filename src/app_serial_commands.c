@@ -40,7 +40,10 @@ typedef enum {
 } APP_teRxState;
 
 /* Serial link message types */
-typedef enum { E_SC_MSG_RESET = 0x0011, E_SC_MSG_ERASE_PERSISTENT_DATA = 0x0012 };
+typedef enum {
+    E_SC_MSG_RESET = 0x0011,
+    E_SC_MSG_ERASE_PERSISTENT_DATA = 0x0012
+} APP_teSerialCommandType;
 
 PRIVATE void APP_vProcessRxChar(uint8 u8Char);
 PRIVATE void APP_vProcessCommand(void);
