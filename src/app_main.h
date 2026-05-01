@@ -15,7 +15,6 @@ extern PUBLIC uint8 u8TimerTick;
 extern PUBLIC uint8 u8TimerRestart;
 extern PUBLIC uint8 u8TimerDeviceTemperature;
 extern PUBLIC tszQueue APP_msgBdbEvents;
-extern PUBLIC tszQueue APP_msgAppEvents;
 extern PUBLIC tszQueue APP_msgSerialTx;
 extern PUBLIC tszQueue APP_msgSerialRx;
 extern PUBLIC tszQueue zps_msgMlmeDcfmInd;

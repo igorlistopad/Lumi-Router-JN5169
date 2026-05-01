@@ -40,7 +40,6 @@ PUBLIC uint8 u8TimerTick;
 PUBLIC uint8 u8TimerRestart;
 PUBLIC uint8 u8TimerDeviceTemperature;
 PUBLIC tszQueue APP_msgBdbEvents;
-PUBLIC tszQueue APP_msgAppEvents;
 PUBLIC tszQueue APP_msgSerialTx;
 PUBLIC tszQueue APP_msgSerialRx;
 
