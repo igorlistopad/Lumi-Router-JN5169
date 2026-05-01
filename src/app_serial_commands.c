@@ -94,8 +94,11 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 
     switch (u8Char) {
     case SL_START_CHAR:
-        /* Reset state machine */
+        /* Reset state machine and all parse state */
+        u8CRC = 0;
         u16Bytes = 0;
+        u16PacketType = 0;
+        u16PacketLength = 0;
         bInEsc = FALSE;
         DBG_vPrintf(TRACE_SERIAL, "RX Start\n");
         eRxState = E_STATE_RX_WAIT_TYPEMSB;
