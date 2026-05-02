@@ -242,3 +242,4 @@ endif
 
 .PHONY: all clean install pre-build pre-install install-sdk install-toolchain main-build
 .SECONDARY: main-build
+.DELETE_ON_ERROR:
