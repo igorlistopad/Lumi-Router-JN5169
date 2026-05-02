@@ -41,7 +41,7 @@ PUBLIC void UART_vInit(void)
 
     vAHI_UartSetRTSCTS(UART, FALSE);
 
-    bAHI_UartEnable(UART, au8TxBuffer, MAX_TX_BUFFER, au8TxBuffer, MAX_RX_BUFFER);
+    bAHI_UartEnable(UART, au8TxBuffer, MAX_TX_BUFFER, au8RxBuffer, MAX_RX_BUFFER);
 
     vAHI_UartReset(UART, TRUE, TRUE);
     vAHI_UartReset(UART, FALSE, FALSE);
