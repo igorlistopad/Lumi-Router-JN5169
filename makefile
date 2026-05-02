@@ -240,5 +240,5 @@ ifneq ($(shell uname -s), Linux)
 	$(error Unsupported operating system)
 endif
 
-.PHONY: all clean
+.PHONY: all clean install pre-build pre-install install-sdk install-toolchain main-build
 .SECONDARY: main-build
