@@ -202,6 +202,7 @@ PRIVATE void APP_vProcessCommand(void)
         break;
 
     default:
+        APP_WriteMessageToSerial("Unknown command.");
         break;
     }
 }
