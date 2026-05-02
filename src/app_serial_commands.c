@@ -23,10 +23,11 @@
 #define TRACE_SERIAL FALSE
 #endif
 
-#define SL_START_CHAR   0x01
-#define SL_ESC_CHAR     0x02
-#define SL_END_CHAR     0x03
-#define MAX_PACKET_SIZE 32
+#define SL_START_CHAR    0x01
+#define SL_ESC_CHAR      0x02
+#define SL_END_CHAR      0x03
+#define MAX_PACKET_SIZE  32
+#define RESTART_DELAY_MS ZTIMER_TIME_MSEC(500)
 
 /* Enumerated list of states for receive state machine */
 typedef enum {
@@ -190,14 +191,14 @@ PRIVATE void APP_vProcessCommand(void)
     switch (u16PacketType) {
     case E_SC_MSG_RESET:
         APP_WriteMessageToSerial("Reset...........");
-        ZTIMER_eStart(u8TimerRestart, ZTIMER_TIME_MSEC(100));
+        ZTIMER_eStart(u8TimerRestart, RESTART_DELAY_MS);
         break;
 
     case E_SC_MSG_ERASE_PERSISTENT_DATA:
         APP_WriteMessageToSerial("Erase PDM.......");
         PDM_vDeleteAllDataRecords();
         APP_WriteMessageToSerial("Reset...........");
-        ZTIMER_eStart(u8TimerRestart, ZTIMER_TIME_MSEC(100));
+        ZTIMER_eStart(u8TimerRestart, RESTART_DELAY_MS);
         break;
 
     default:
