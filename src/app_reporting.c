@@ -35,6 +35,7 @@ typedef struct {
 } APP_tsReports;
 
 PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum);
+PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport);
 
 /* Just Two reports for time being */
 PRIVATE APP_tsReports asSavedReports[ZCL_NUMBER_OF_REPORTS];
@@ -87,16 +88,7 @@ PUBLIC void APP_vMakeSupportedAttributesReportable(void)
         u16AttributeEnum = asSavedReports[i].sAttributeReportingConfigurationRecord.u16AttributeEnum;
         u16ClusterId = asSavedReports[i].u16ClusterID;
         psAttributeReportingConfigurationRecord = &(asSavedReports[i].sAttributeReportingConfigurationRecord);
-        DBG_vPrintf(
-            TRACE_REPORT,
-            "Cluster %04x Attribute %04x Min %d Max %d IntV %d Direct %d Change %d\n",
-            u16ClusterId,
-            u16AttributeEnum,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u16MinimumReportingInterval,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
+        APP_vPrintReportRecord(&asSavedReports[i]);
         eZCL_SetReportableFlag(LUMIROUTER_APPLICATION_ENDPOINT, u16ClusterId, TRUE, FALSE, u16AttributeEnum);
         eZCL_CreateLocalReport(LUMIROUTER_APPLICATION_ENDPOINT,
                                u16ClusterId,
@@ -119,17 +111,7 @@ PUBLIC void APP_vLoadDefaultConfigForReportable(void)
 
     for (i = 0; i < ZCL_NUMBER_OF_REPORTS; i++) {
         asSavedReports[i] = asDefaultReports[i];
-        DBG_vPrintf(
-            TRACE_REPORT,
-            "Cluster %04x Type %d Attr %04x Min %d Max %d IntV %d Direct %d Change %d\n",
-            asSavedReports[i].u16ClusterID,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.eAttributeDataType,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u16AttributeEnum,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u16MinimumReportingInterval,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
-            asSavedReports[i].sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
+        APP_vPrintReportRecord(&asSavedReports[i]);
     }
 
     /* Save this Records */
@@ -157,17 +139,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
            psAttributeReportingConfigurationRecord,
            sizeof(tsZCL_AttributeReportingConfigurationRecord));
 
-    DBG_vPrintf(TRACE_REPORT,
-                "Cluster %04x Type %d Attrib %04x Min %d Max %d IntV %d Direction %d Change %d\n",
-                asSavedReports[u8Index].u16ClusterID,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.eAttributeDataType,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16AttributeEnum,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16MinimumReportingInterval,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
-                asSavedReports[u8Index]
-                    .sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
+    APP_vPrintReportRecord(&asSavedReports[u8Index]);
 
     /* Save this Records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
@@ -199,17 +171,7 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
            &(asDefaultReports[u8Index].sAttributeReportingConfigurationRecord),
            sizeof(tsZCL_AttributeReportingConfigurationRecord));
 
-    DBG_vPrintf(TRACE_REPORT,
-                "Cluster %04x Type %d Attrib %04x Min %d Max %d IntV %d Direction %d Change %d\n",
-                asSavedReports[u8Index].u16ClusterID,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.eAttributeDataType,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16AttributeEnum,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16MinimumReportingInterval,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
-                asSavedReports[u8Index].sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
-                asSavedReports[u8Index]
-                    .sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
+    APP_vPrintReportRecord(&asSavedReports[u8Index]);
 
     /* Save this Records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
@@ -227,4 +189,23 @@ PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
     }
 
     return u8Index;
+}
+
+/**
+ * @brief Print report record for debugging
+ */
+PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport)
+{
+    tsZCL_AttributeReportingConfigurationRecord *psRec = &psReport->sAttributeReportingConfigurationRecord;
+
+    DBG_vPrintf(TRACE_REPORT,
+                "Cluster %04x Type %d Attr %04x Min %d Max %d IntV %d Direct %d Change %d\n",
+                psReport->u16ClusterID,
+                psRec->eAttributeDataType,
+                psRec->u16AttributeEnum,
+                psRec->u16MinimumReportingInterval,
+                psRec->u16MaximumReportingInterval,
+                psRec->u16TimeoutPeriodField,
+                psRec->u8DirectionIsReceived,
+                psRec->uAttributeReportableChange.zint16ReportableChange);
 }
