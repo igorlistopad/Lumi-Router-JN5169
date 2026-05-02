@@ -23,9 +23,7 @@
 #include "pwrm.h"
 #include "zps_nwk_pub.h"
 
-#ifdef DEBUG_APP
-#define TRACE_APP TRUE
-#else
+#ifndef TRACE_APP
 #define TRACE_APP FALSE
 #endif
 

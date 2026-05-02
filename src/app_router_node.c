@@ -33,9 +33,7 @@
 #include "zps_apl_zdo.h"
 #include "zps_nwk_nib.h"
 
-#ifdef DEBUG_APP
-#define TRACE_APP TRUE
-#else
+#ifndef TRACE_APP
 #define TRACE_APP FALSE
 #endif
 

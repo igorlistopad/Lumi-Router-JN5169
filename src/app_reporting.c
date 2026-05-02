@@ -21,9 +21,7 @@
 #include "zcl.h"
 #include "zcl_common.h"
 
-#ifdef DEBUG_REPORT
-#define TRACE_REPORT TRUE
-#else
+#ifndef TRACE_REPORT
 #define TRACE_REPORT FALSE
 #endif
 

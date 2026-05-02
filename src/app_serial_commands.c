@@ -17,9 +17,7 @@
 #include "dbg.h"
 #include "portmacro.h"
 
-#ifdef DEBUG_SERIAL
-#define TRACE_SERIAL TRUE
-#else
+#ifndef TRACE_SERIAL
 #define TRACE_SERIAL FALSE
 #endif
 

@@ -23,9 +23,7 @@
 #include "dbg.h"
 #include "zcl.h"
 
-#ifdef DEBUG_ZCL
-#define TRACE_ZCL TRUE
-#else
+#ifndef TRACE_ZCL
 #define TRACE_ZCL FALSE
 #endif
 

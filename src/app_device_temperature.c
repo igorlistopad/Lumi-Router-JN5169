@@ -15,9 +15,7 @@
 #include "ZTimer.h"
 #include "dbg.h"
 
-#ifdef DEBUG_DEVICE_TEMPERATURE
-#define TRACE_DEVICE_TEMPERATURE TRUE
-#else
+#ifndef TRACE_DEVICE_TEMPERATURE
 #define TRACE_DEVICE_TEMPERATURE FALSE
 #endif
 

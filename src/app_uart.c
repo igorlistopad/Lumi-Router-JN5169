@@ -15,9 +15,7 @@
 #include "ZQueue.h"
 #include "dbg.h"
 
-#ifdef DEBUG_UART
-#define TRACE_UART TRUE
-#else
+#ifndef TRACE_UART
 #define TRACE_UART FALSE
 #endif
 
