@@ -122,10 +122,6 @@ PUBLIC void UART_vRtsStopFlow(void)
     vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, E_AHI_UART_RTS_HIGH);
 }
 
-/****************************************************************************/
-/***        Local Functions                                               ***/
-/****************************************************************************/
-
 /**
  * @brief Set baud rates UART
  */
