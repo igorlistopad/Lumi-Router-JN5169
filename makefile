@@ -146,7 +146,7 @@ LDLIBS := $(APPLDLIBS) $(LDLIBS)
 LDLIBS += JPT_$(JENNIC_CHIP)
 
 # Path to directories containing application source 
-vpath % $(APP_SRC_DIR):$(ZCL_SRC_DIRS):$(ZCL_SRC):$(BDB_SRC_DIR):$(UTIL_SRC_DIR):$(HW_SRC_DIR)
+vpath % $(APP_SRC_DIR):$(ZCL_SRC_DIRS):$(BDB_SRC_DIR):$(UTIL_SRC_DIR):$(HW_SRC_DIR)
 
 all: pre-build main-build
 
