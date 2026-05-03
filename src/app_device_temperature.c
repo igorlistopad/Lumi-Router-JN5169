@@ -87,13 +87,24 @@ PRIVATE int16 APP_i16GetDeviceTemperature(void)
 }
 
 /**
- * @brief   Helper Function to convert 10bit ADC reading to degrees C
- * @details Formula: DegC = Typical DegC - ((Reading12 - Typ12) * ScaleFactor)
- *          Where C = 25 and temps sensor output 730mv at 25C (from datasheet)
- *          As we use 2Vref and 10bit adc this gives (730/2400)*4096  [=Typ12 =1210]
- *          Scale factor is half the 0.706 data-sheet resolution DegC/LSB (2Vref)
+ * @brief   Convert 10-bit ADC reading to degrees Celsius
+ * @details Formula: T = 25 - ((ADC12 - Typ12) * Scale) / 1000
+ *
+ *          ADC12 = u16AdcValue * 4 (10-bit left-aligned to 12-bit)
+ *
+ *          Typ12 = 1245: 12-bit ADC reading at 25°C
+ *          V_sensor(25°C) = 730 mV (JN5169 datasheet, typical)
+ *          ADC range = 2 × Vref_int = 2 × 1.2V = 2.4V
+ *          Typ12 = (730 / 2400) × 4096 = 1245
+ *
+ *          Scale = 283: temperature change per ADC12 LSB, in 0.001 °C
+ *          1 LSB = 2400 / 4096 = 0.5859 mV
+ *          Sensor coefficient = −2.07 mV/°C (JN5169 datasheet, typical)
+ *          Scale = 0.5859 / 2.07 = 0.283 °C/LSB
+ *
+ *          Note: V_25 and Tc are typical values and vary per chip (±3-5°C accuracy).
  */
 PRIVATE int16 APP_i16ConvertChipTemp(uint16 u16AdcValue)
 {
-    return (int16)((int32)25 - ((((int32)(u16AdcValue * 4) - (int32)1210) * (int32)353) / (int32)1000));
+    return (int16)((int32)25 - ((((int32)(u16AdcValue * 4) - (int32)1245) * (int32)283) / (int32)1000));
 }
