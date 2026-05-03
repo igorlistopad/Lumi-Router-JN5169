@@ -63,11 +63,7 @@ PUBLIC void APP_isrUart(void)
 
     if (u8IntStatus & E_AHI_UART_RXDATA_MASK) {
         u8Byte = u8AHI_UartReadData(UART);
-        if (!ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte)) {
-            /* Queue full - assert RTS to stop sender and drain HW FIFO */
-            UART_vRtsStopFlow();
-            u8AHI_UartReadData(UART);
-        }
+        ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte);
     }
     else if (u8IntStatus & E_AHI_UART_TX_MASK) {
         if (ZQ_bQueueReceive(&APP_msgSerialTx, &u8Byte)) {
@@ -103,22 +99,6 @@ PUBLIC bool_t UART_bTxReady()
 PUBLIC void UART_vSetTxInterrupt(bool_t bState)
 {
     vAHI_UartSetInterrupt(UART, FALSE, FALSE, bState, TRUE, E_AHI_UART_FIFO_LEVEL_1);
-}
-
-/**
- * @brief Set UART RS-232 RTS line low to allow further data
- */
-PUBLIC void UART_vRtsStartFlow(void)
-{
-    vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, E_AHI_UART_RTS_LOW);
-}
-
-/**
- * @brief Set UART RS-232 RTS line high to stop any further data coming in
- */
-PUBLIC void UART_vRtsStopFlow(void)
-{
-    vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, E_AHI_UART_RTS_HIGH);
 }
 
 /**

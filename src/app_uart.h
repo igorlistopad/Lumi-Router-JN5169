@@ -13,7 +13,5 @@ PUBLIC void APP_isrUart(void);
 PUBLIC void UART_vTxChar(uint8 u8TxChar);
 PUBLIC bool_t UART_bTxReady(void);
 PUBLIC void UART_vSetTxInterrupt(bool_t bState);
-PUBLIC void UART_vRtsStartFlow(void);
-PUBLIC void UART_vRtsStopFlow(void);
 
 #endif /* APP_UART_H */

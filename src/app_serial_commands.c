@@ -62,10 +62,6 @@ PUBLIC void APP_taskAtSerial(void)
     uint8 u8RxByte;
     if (ZQ_bQueueReceive(&APP_msgSerialRx, &u8RxByte)) {
         APP_vProcessRxChar(u8RxByte);
-        /* If queue is draining, re-enable RTS flow */
-        if (ZQ_bQueueIsEmpty(&APP_msgSerialRx)) {
-            UART_vRtsStartFlow();
-        }
     }
 }
 

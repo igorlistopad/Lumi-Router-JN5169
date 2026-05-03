@@ -118,7 +118,6 @@ PRIVATE void APP_vInitialise(void)
     PDUM_vInit();
 
     UART_vInit();
-    UART_vRtsStartFlow();
 
     ZPS_vExtendedStatusSetCallback(vfExtendedStatusCallBack);
 
