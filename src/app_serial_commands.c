@@ -49,7 +49,7 @@ PRIVATE void APP_vProcessCommand(void);
 PRIVATE void APP_vWriteTxChar(uint8 u8Char);
 PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Data);
 
-PRIVATE uint8 au8LinkRxBuffer[32];
+PRIVATE uint8 au8LinkRxBuffer[MAX_PACKET_SIZE];
 PRIVATE uint16 u16PacketType;
 PRIVATE uint16 u16PacketLength;
 PRIVATE uint32 sStorage;
@@ -105,6 +105,10 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
         break;
 
     case SL_END_CHAR:
+        /* Ignore stray END outside of a packet */
+        if (eRxState == E_STATE_RX_WAIT_START) {
+            break;
+        }
         /* End message */
         DBG_vPrintf(TRACE_SERIAL, "Got END\n");
         eRxState = E_STATE_RX_WAIT_START;
@@ -228,9 +232,9 @@ PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Dat
     int n;
     uint8 u8CRC;
 
-    u8CRC = (u16Type >> 0) & 0xff;
+    u8CRC = u16Type & 0xff;
     u8CRC ^= (u16Type >> 8) & 0xff;
-    u8CRC ^= (u16Length >> 0) & 0xff;
+    u8CRC ^= u16Length & 0xff;
     u8CRC ^= (u16Length >> 8) & 0xff;
 
     for (n = 0; n < u16Length; n++) {
