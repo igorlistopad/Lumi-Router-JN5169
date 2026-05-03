@@ -21,7 +21,6 @@
 
 #define UART           E_AHI_UART_0
 #define UART_BAUD_RATE 115200
-#define UART_START_ADR 0x02003000UL
 #define MAX_TX_BUFFER  16
 #define MAX_RX_BUFFER  255
 
@@ -59,10 +58,10 @@ PUBLIC void UART_vInit(void)
  */
 PUBLIC void APP_isrUart(void)
 {
-    uint32 u32ItemBitmap = ((*((volatile uint32 *)(UART_START_ADR + 0x08))) >> 1) & 0x0007;
     uint8 u8Byte;
+    uint8 u8IntStatus = u8AHI_UartReadInterruptStatus(UART);
 
-    if (u32ItemBitmap & E_AHI_UART_INT_RXDATA) {
+    if (u8IntStatus & E_AHI_UART_RXDATA_MASK) {
         u8Byte = u8AHI_UartReadData(UART);
         if (!ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte)) {
             /* Queue full - assert RTS to stop sender and drain HW FIFO */
@@ -70,7 +69,7 @@ PUBLIC void APP_isrUart(void)
             u8AHI_UartReadData(UART);
         }
     }
-    else if (u32ItemBitmap & E_AHI_UART_INT_TX) {
+    else if (u8IntStatus & E_AHI_UART_TX_MASK) {
         if (ZQ_bQueueReceive(&APP_msgSerialTx, &u8Byte)) {
             UART_vSetTxInterrupt(TRUE);
             vAHI_UartWriteData(UART, u8Byte);
