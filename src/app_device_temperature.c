@@ -1,6 +1,6 @@
 /**
  * @file  app_device_temperature.c
- * @brief Set of functions/task for read device temperature
+ * @brief Set of functions/task for reading device temperature
  */
 
 #include <jendefs.h>
@@ -48,7 +48,7 @@ PUBLIC void APP_vDeviceTemperatureInit(void)
 }
 
 /**
- * @brief CallBack For Device Temperature Update timer
+ * @brief Callback For Device Temperature Update timer
  */
 PUBLIC void APP_cbTimerDeviceTemperatureUpdate(void *pvParam)
 {

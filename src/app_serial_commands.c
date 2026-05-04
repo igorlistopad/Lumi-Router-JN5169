@@ -182,7 +182,7 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 }
 
 /**
- * @brief Processed the received command
+ * @brief Processes the received command
  */
 PRIVATE void APP_vProcessCommand(void)
 {

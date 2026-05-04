@@ -45,16 +45,16 @@ PUBLIC void APP_ZCL_vInitialise(void)
 {
     teZCL_Status eZCL_Status;
 
-    /* Initialise ZLL */
+    /* Initialise ZCL */
     eZCL_Status = eZCL_Initialise(&APP_ZCL_cbGeneralCallback, apduZCL);
     if (eZCL_Status != E_ZCL_SUCCESS) {
-        DBG_vPrintf(TRACE_ZCL, "Err: eZLO_Initialise:%d\n", eZCL_Status);
+        DBG_vPrintf(TRACE_ZCL, "Error: eZCL_Initialise failed: %d\n", eZCL_Status);
     }
 
     /* Start the tick timer */
     ZTIMER_eStart(u8TimerTick, ZCL_TICK_TIME);
 
-    /* Register Light EndPoint */
+    /* Register Router EndPoint */
     eZCL_Status = APP_ZCL_eRegisterEndPoint(&APP_ZCL_cbEndpointCallback, &sLumiRouter);
     if (eZCL_Status != E_ZCL_SUCCESS) {
         DBG_vPrintf(TRACE_ZCL, "Error: APP_ZCL_eRegisterEndPoint: %02x\n", eZCL_Status);
@@ -77,7 +77,7 @@ PUBLIC void APP_ZCL_vEventHandler(ZPS_tsAfEvent *psStackEvent)
 }
 
 /**
- * @brief CallBack For ZCL Tick timer
+ * @brief Callback For ZCL Tick timer
  */
 PUBLIC void APP_cbTimerZclTick(void *pvParam)
 {

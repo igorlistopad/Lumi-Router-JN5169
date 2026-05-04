@@ -54,7 +54,7 @@ PUBLIC void UART_vInit(void)
 }
 
 /**
- * @brief Handle interrupts from uart
+ * @brief Handle interrupts from UART
  */
 PUBLIC void APP_isrUart(void)
 {

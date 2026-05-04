@@ -94,7 +94,7 @@ PUBLIC void APP_vInitialiseRouter(void)
     DBG_vPrintf(TRACE_APP, "PDM: Occupancy %d\n", u8PDM_GetFileSystemOccupancy());
 #endif
 
-    DBG_vPrintf(TRACE_APP, "Start Up StaTe %d On Network %d\n", eNodeState, sBDB.sAttrib.bbdbNodeIsOnANetwork);
+    DBG_vPrintf(TRACE_APP, "Start Up State %d On Network %d\n", eNodeState, sBDB.sAttrib.bbdbNodeIsOnANetwork);
 
     /* Load the reports from the PDM or the default ones depending on the PDM load record status */
     if (eStatusReportReload != PDM_E_STATUS_OK) {
@@ -108,7 +108,7 @@ PUBLIC void APP_vInitialiseRouter(void)
 }
 
 /**
- * @brief CallBack For Restart
+ * @brief Callback For Restart
  */
 PUBLIC void APP_cbTimerRestart(void *pvParam)
 {
@@ -231,7 +231,7 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
                     psAfEvent->uEvent.sNwkJoinedEvent.bRejoin);
         break;
     case ZPS_EVENT_NWK_FAILED_TO_START:
-        DBG_vPrintf(TRACE_APP, "APP-ZDO: Network Failed To start\n");
+        DBG_vPrintf(TRACE_APP, "APP-ZDO: Network Failed To Start\n");
         break;
 
     case ZPS_EVENT_NWK_FAILED_TO_JOIN:

@@ -27,7 +27,7 @@
 
 #define APP_ZTIMER_STORAGE   3
 #define BDB_QUEUE_SIZE       2
-#define MLME_QUEQUE_SIZE     8
+#define MLME_QUEUE_SIZE      8
 #define MCPS_QUEUE_SIZE      20
 #define TIMER_QUEUE_SIZE     8
 #define MCPS_DCFM_QUEUE_SIZE 5
@@ -43,7 +43,7 @@ PUBLIC tszQueue APP_msgSerialRx;
 
 PRIVATE ZTIMER_tsTimer asTimers[APP_ZTIMER_STORAGE + BDB_ZTIMER_STORAGE];
 PRIVATE BDB_tsZpsAfEvent asBdbEvent[BDB_QUEUE_SIZE];
-PRIVATE MAC_tsMlmeVsDcfmInd asMacMlmeVsDcfmInd[MLME_QUEQUE_SIZE];
+PRIVATE MAC_tsMlmeVsDcfmInd asMacMlmeVsDcfmInd[MLME_QUEUE_SIZE];
 PRIVATE MAC_tsMcpsVsDcfmInd asMacMcpsDcfmInd[MCPS_QUEUE_SIZE];
 PRIVATE zps_tsTimeEvent asTimeEvent[TIMER_QUEUE_SIZE];
 PRIVATE MAC_tsMcpsVsCfmData asMacMcpsDcfm[MCPS_DCFM_QUEUE_SIZE];
@@ -91,7 +91,7 @@ PUBLIC void APP_vSetUpHardware(void)
 }
 
 /**
- * @brief Initialise resources (timers, queue's etc)
+ * @brief Initialise resources (timers, queues etc)
  */
 PUBLIC void APP_vInitResources(void)
 {
@@ -105,7 +105,7 @@ PUBLIC void APP_vInitResources(void)
 
     /* Create all the queues */
     ZQ_vQueueCreate(&APP_msgBdbEvents, BDB_QUEUE_SIZE, sizeof(BDB_tsZpsAfEvent), (uint8 *)asBdbEvent);
-    ZQ_vQueueCreate(&zps_msgMlmeDcfmInd, MLME_QUEQUE_SIZE, sizeof(MAC_tsMlmeVsDcfmInd), (uint8 *)asMacMlmeVsDcfmInd);
+    ZQ_vQueueCreate(&zps_msgMlmeDcfmInd, MLME_QUEUE_SIZE, sizeof(MAC_tsMlmeVsDcfmInd), (uint8 *)asMacMlmeVsDcfmInd);
     ZQ_vQueueCreate(&zps_msgMcpsDcfmInd, MCPS_QUEUE_SIZE, sizeof(MAC_tsMcpsVsDcfmInd), (uint8 *)asMacMcpsDcfmInd);
     ZQ_vQueueCreate(&zps_TimeEvents, TIMER_QUEUE_SIZE, sizeof(zps_tsTimeEvent), (uint8 *)asTimeEvent);
     ZQ_vQueueCreate(&zps_msgMcpsDcfm, MCPS_DCFM_QUEUE_SIZE, sizeof(MAC_tsMcpsVsCfmData), (uint8 *)asMacMcpsDcfm);

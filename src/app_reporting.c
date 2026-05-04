@@ -35,7 +35,7 @@ typedef struct {
 PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum);
 PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport);
 
-/* Just Two reports for time being */
+/* Just Two reports for the time being */
 PRIVATE APP_tsReports asSavedReports[ZCL_NUMBER_OF_REPORTS];
 
 /* define the default reports */
@@ -112,7 +112,7 @@ PUBLIC void APP_vLoadDefaultConfigForReportable(void)
         APP_vPrintReportRecord(&asSavedReports[i]);
     }
 
-    /* Save this Records */
+    /* Save these records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 
@@ -131,7 +131,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
 
     DBG_vPrintf(TRACE_REPORT, "Save to report %d\n", u8Index);
 
-    /* For CurrentLevel attribute in LevelControl Cluster */
+    /* Update the reportable record with new configuration */
     asSavedReports[u8Index].u16ClusterID = u16ClusterID;
     memcpy(&(asSavedReports[u8Index].sAttributeReportingConfigurationRecord),
            psAttributeReportingConfigurationRecord,
@@ -139,7 +139,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
 
     APP_vPrintReportRecord(&asSavedReports[u8Index]);
 
-    /* Save this Records */
+    /* Save these records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 
@@ -171,7 +171,7 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
 
     APP_vPrintReportRecord(&asSavedReports[u8Index]);
 
-    /* Save this Records */
+    /* Save these records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 

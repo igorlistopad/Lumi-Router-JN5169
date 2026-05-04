@@ -16,10 +16,10 @@
 /* Number of endpoints supported by this device */
 #define ZCL_NUMBER_OF_ENDPOINTS 1
 
-/* ZCL has all cooperative task */
+/* ZCL has all cooperative tasks */
 #define COOPERATIVE
 
-/* Set this True to disable non error default responses from clusters */
+/* Set this True to disable non-error default responses from clusters */
 #define ZCL_DISABLE_DEFAULT_RESPONSES (TRUE)
 #define ZCL_DISABLE_APS_ACK           (TRUE)
 
@@ -50,7 +50,7 @@ enum { REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT = 0, NUMBER_OF_REPORTS };
 
 /**
  * @brief Enable Cluster
- * @note  Enable cluster and their client or server instances
+ * @note  Enables clusters and their client or server instances
  */
 #define CLD_BASIC
 #define BASIC_SERVER
