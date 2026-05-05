@@ -30,8 +30,6 @@
 PRIVATE void APP_vInitialise(void);
 PRIVATE void APP_vExtendedStatusCallback(ZPS_teExtendedStatus eExtendedStatus);
 
-extern void *_stack_low_water_mark;
-
 /**
  * @brief Entry point for application from a cold start.
  * @note  Called in SDK JN-SW-4170
@@ -51,11 +49,6 @@ PUBLIC void vAppMain(void)
 #endif
 
     DBG_vPrintf(TRACE_APP, "*** Initializing Lumi Router ***\n");
-
-    /* Initialise the stack overflow exception to trigger if the end of the
-     * stack is reached. See the linker command file to adjust the allocated
-     * stack size. */
-    vAHI_SetStackOverflow(TRUE, (uint32)&_stack_low_water_mark);
 
 #ifdef ENABLING_HIGH_POWER_MODE
     /* After testing on Xiaomi DGNWG05LM and Aqara ZHWG11LM devices, it was
