@@ -64,9 +64,6 @@ PUBLIC void APP_vInitialiseRouter(void)
     uint16 u16ByteRead;
     PDM_teStatus eStatusReportReload;
 
-    /* Stay awake */
-    PWRM_eStartActivity();
-
     eNodeState = E_STARTUP;
     PDM_eReadDataFromRecord(PDM_ID_APP_ROUTER, &eNodeState, sizeof(APP_teNodeState), &u16ByteRead);
 
