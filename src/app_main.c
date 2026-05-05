@@ -59,12 +59,17 @@ extern void PWRM_vManagePower(void);
 PUBLIC void APP_vMainLoop(void)
 {
     while (TRUE) {
+        /* Drives the ZigBee PRO stack — processes MAC queues,
+         * routes packets and generates BDB events */
         zps_taskZPS();
 
+        /* Processes BDB event queue */
         bdb_taskBDB();
 
+        /* Ticks software timers */
         ZTIMER_vTask();
 
+        /* Processes serial Rx message queue */
         APP_taskAtSerial();
 
         /* Re-load the watch-dog timer. Execution must return through the idle
@@ -85,7 +90,6 @@ PUBLIC void APP_vMainLoop(void)
 PUBLIC void APP_vSetUpHardware(void)
 {
     TARGET_INITIALISE();
-    /* clear interrupt priority level */
     SET_IPL(0);
     portENABLE_INTERRUPTS();
 }
