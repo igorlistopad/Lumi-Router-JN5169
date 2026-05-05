@@ -50,16 +50,12 @@ PUBLIC void vAppMain(void)
     DBG_vUartInit(DBG_E_UART_1, DBG_E_UART_BAUD_RATE_115200);
 #endif
 
+    DBG_vPrintf(TRACE_APP, "*** Initializing Lumi Router ***\n");
+
     /* Initialise the stack overflow exception to trigger if the end of the
      * stack is reached. See the linker command file to adjust the allocated
      * stack size. */
     vAHI_SetStackOverflow(TRUE, (uint32)&_stack_low_water_mark);
-
-    /* Catch resets due to watchdog timer expiry. Comment out to harden code. */
-    if (bAHI_WatchdogResetEvent()) {
-        DBG_vPrintf(TRACE_APP, "APP: Watchdog timer has reset device!\n");
-        DBG_vDumpStack();
-    }
 
 #ifdef ENABLING_HIGH_POWER_MODE
     /* After testing on Xiaomi DGNWG05LM and Aqara ZHWG11LM devices, it was
@@ -72,9 +68,6 @@ PUBLIC void vAppMain(void)
      * - vAppApiSetHighPowerMode (APP_API_MODULE_HPM05, TRUE) works well both on Xiaomi and Aqara */
     vAppApiSetHighPowerMode(APP_API_MODULE_HPM05, TRUE);
 #endif
-
-    /* idle task commences here */
-    DBG_vPrintf(TRACE_APP, "*** ROUTER RESET ***\n");
 
     DBG_vPrintf(TRACE_APP, "APP: Entering APP_vSetUpHardware()\n");
     APP_vSetUpHardware();
@@ -111,14 +104,17 @@ PRIVATE void APP_vInitialise(void)
      * device to doze when in the idle task */
     PWRM_vInit(E_AHI_SLEEP_OSCON_RAMON);
 
-    /* Initialise the Persistent Data Manager */
-    PDM_eInitialise(63);
+    /* Initialise the Persistent Data Manager
+     * If this parameter is set to zero, the application is given access to the full EEPROM. */
+    PDM_eInitialise(0);
 
     /* Initialise Protocol Data Unit Manager */
     PDUM_vInit();
 
+    /* Initialise the UART peripheral */
     UART_vInit();
 
+    /* Register a callback function for extended error handling */
     ZPS_vExtendedStatusSetCallback(APP_vExtendedStatusCallback);
 
     /* Initialise application */
