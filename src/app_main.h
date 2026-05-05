@@ -1,6 +1,6 @@
 /**
  * @file  app_main.h
- * @brief Application main file
+ * @brief Application main
  */
 
 #ifndef APP_MAIN_H

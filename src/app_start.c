@@ -28,7 +28,7 @@
 #endif
 
 PRIVATE void APP_vInitialise(void);
-PRIVATE void vfExtendedStatusCallBack(ZPS_teExtendedStatus eExtendedStatus);
+PRIVATE void APP_vExtendedStatusCallback(ZPS_teExtendedStatus eExtendedStatus);
 
 extern void *_stack_low_water_mark;
 
@@ -103,7 +103,7 @@ PUBLIC void vAppRegisterPWRMCallbacks(void)
 }
 
 /**
- * @brief Initialises Zigbee stack, hardware and application.
+ * @brief Initialises ZigBee stack, hardware and application.
  */
 PRIVATE void APP_vInitialise(void)
 {
@@ -119,7 +119,7 @@ PRIVATE void APP_vInitialise(void)
 
     UART_vInit();
 
-    ZPS_vExtendedStatusSetCallback(vfExtendedStatusCallBack);
+    ZPS_vExtendedStatusSetCallback(APP_vExtendedStatusCallback);
 
     /* Initialise application */
     APP_vInitialiseRouter();
@@ -128,7 +128,7 @@ PRIVATE void APP_vInitialise(void)
 /**
  * @brief Callback from stack on extended error situations.
  */
-PRIVATE void vfExtendedStatusCallBack(ZPS_teExtendedStatus eExtendedStatus)
+PRIVATE void APP_vExtendedStatusCallback(ZPS_teExtendedStatus eExtendedStatus)
 {
     DBG_vPrintf(TRACE_APP, "ERROR: Extended status 0x%02x\n", eExtendedStatus);
 }

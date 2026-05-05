@@ -37,7 +37,10 @@
 #define TRACE_APP FALSE
 #endif
 
-typedef enum { E_STARTUP, E_RUNNING } APP_teNodeState;
+typedef enum {
+    E_STARTUP,
+    E_RUNNING
+} APP_teNodeState;
 
 PRIVATE void APP_vBdbInit(void);
 PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent);
@@ -49,10 +52,9 @@ PRIVATE void APP_vPrintAPSTable(void);
 
 PRIVATE APP_teNodeState eNodeState;
 
-#ifdef PDM_EEPROM
-extern uint8 u8PDM_CalculateFileSystemCapacity();
-extern uint8 u8PDM_GetFileSystemOccupancy();
-#endif
+/* Hidden functions (exported from the library, but not mentioned in header files) */
+PUBLIC uint8 u8PDM_CalculateFileSystemCapacity(void);
+PUBLIC uint8 u8PDM_GetFileSystemOccupancy(void);
 
 /**
  * @brief Initialises the application related functions
@@ -79,22 +81,18 @@ PUBLIC void APP_vInitialiseRouter(void)
     /* Initialise ZCL */
     APP_ZCL_vInitialise();
 
-    /* Initialise other software modules
-     * HERE */
+    /* Initialise BDB */
     APP_vBdbInit();
 
-    /* Always initialise any peripherals used by the application
-     * HERE */
+    /* Initialise peripherals */
     APP_vDeviceTemperatureInit();
 
-#ifdef PDM_EEPROM
     /* The functions u8PDM_CalculateFileSystemCapacity and u8PDM_GetFileSystemOccupancy
-     * may be called at any time to monitor space available in  the eeprom */
+     * may be called at any time to monitor space available in the EEPROM */
     DBG_vPrintf(TRACE_APP, "PDM: Capacity %d\n", u8PDM_CalculateFileSystemCapacity());
     DBG_vPrintf(TRACE_APP, "PDM: Occupancy %d\n", u8PDM_GetFileSystemOccupancy());
-#endif
 
-    DBG_vPrintf(TRACE_APP, "Start Up StaTe %d On Network %d\n", eNodeState, sBDB.sAttrib.bbdbNodeIsOnANetwork);
+    DBG_vPrintf(TRACE_APP, "Start Up State %d On Network %d\n", eNodeState, sBDB.sAttrib.bbdbNodeIsOnANetwork);
 
     /* Load the reports from the PDM or the default ones depending on the PDM load record status */
     if (eStatusReportReload != PDM_E_STATUS_OK) {
@@ -108,7 +106,7 @@ PUBLIC void APP_vInitialiseRouter(void)
 }
 
 /**
- * @brief CallBack For Restart
+ * @brief Callback for restart
  */
 PUBLIC void APP_cbTimerRestart(void *pvParam)
 {
@@ -160,7 +158,7 @@ PUBLIC void APP_vBdbCallback(BDB_tsBdbEvent *psBdbEvent)
 }
 
 /**
- * @brief Function to initialize BDB attributes and message queue
+ * @brief Initialise BDB attributes and message queue
  */
 PRIVATE void APP_vBdbInit(void)
 {
@@ -186,7 +184,7 @@ PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
         APP_vHandleZdoEvents(psZpsAfEvent);
     }
 
-    /* Ensure Freeing of Apdus */
+    /* Ensure freeing of APDUs */
     if (psZpsAfEvent->sStackEvent.eType == ZPS_EVENT_APS_DATA_INDICATION) {
         PDUM_eAPduFreeAPduInstance(psZpsAfEvent->sStackEvent.uEvent.sApsDataIndEvent.hAPduInst);
     }
@@ -230,8 +228,9 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
                     psAfEvent->uEvent.sNwkJoinedEvent.u16Addr,
                     psAfEvent->uEvent.sNwkJoinedEvent.bRejoin);
         break;
+
     case ZPS_EVENT_NWK_FAILED_TO_START:
-        DBG_vPrintf(TRACE_APP, "APP-ZDO: Network Failed To start\n");
+        DBG_vPrintf(TRACE_APP, "APP-ZDO: Network Failed To Start\n");
         break;
 
     case ZPS_EVENT_NWK_FAILED_TO_JOIN:
@@ -283,7 +282,7 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
 
     case ZPS_EVENT_NWK_STATUS_INDICATION:
         DBG_vPrintf(TRACE_APP,
-                    "APP-ZDO: Network status Indication %02x addr %04x\n",
+                    "APP-ZDO: Network status indication %02x addr %04x\n",
                     psAfEvent->uEvent.sNwkStatusIndicationEvent.u8Status,
                     psAfEvent->uEvent.sNwkStatusIndicationEvent.u16NwkAddr);
         break;
@@ -301,7 +300,7 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
         break;
 
     case ZPS_EVENT_ZDO_UNBIND:
-        DBG_vPrintf(TRACE_APP, "APP-ZDO: Zdo Unbind Event\n");
+        DBG_vPrintf(TRACE_APP, "APP-ZDO: Zdo Unbind event\n");
         break;
 
     case ZPS_EVENT_ZDO_LINK_KEY:
@@ -351,29 +350,28 @@ PRIVATE void APP_vFactoryResetRecords(void)
  */
 PRIVATE void APP_vPrintAPSTable(void)
 {
-    uint8 i;
-    uint8 j;
+    uint8 i, j;
 
-    ZPS_tsAplAib *tsAplAib;
+    ZPS_tsAplAib *psAplAib;
 
-    tsAplAib = ZPS_psAplAibGetAib();
+    psAplAib = ZPS_psAplAibGetAib();
 
-    for (i = 0; i < (tsAplAib->psAplDeviceKeyPairTable->u16SizeOfKeyDescriptorTable + 1); i++) {
+    for (i = 0; i < (psAplAib->psAplDeviceKeyPairTable->u16SizeOfKeyDescriptorTable + 1); i++) {
         DBG_vPrintf(TRACE_APP,
                     "MAC: %016llx Key: ",
                     ZPS_u64NwkNibGetMappedIeeeAddr(
                         ZPS_pvAplZdoGetNwkHandle(),
-                        tsAplAib->psAplDeviceKeyPairTable->psAplApsKeyDescriptorEntry[i].u16ExtAddrLkup));
+                        psAplAib->psAplDeviceKeyPairTable->psAplApsKeyDescriptorEntry[i].u16ExtAddrLkup));
         for (j = 0; j < 16; j++) {
             DBG_vPrintf(TRACE_APP,
                         "%02x ",
-                        tsAplAib->psAplDeviceKeyPairTable->psAplApsKeyDescriptorEntry[i].au8LinkKey[j]);
+                        psAplAib->psAplDeviceKeyPairTable->psAplApsKeyDescriptorEntry[i].au8LinkKey[j]);
         }
         DBG_vPrintf(TRACE_APP, "\n");
-        DBG_vPrintf(TRACE_APP, "Incoming FC: %d\n", tsAplAib->pu32IncomingFrameCounter[i]);
+        DBG_vPrintf(TRACE_APP, "Incoming FC: %d\n", psAplAib->pu32IncomingFrameCounter[i]);
         DBG_vPrintf(TRACE_APP,
                     "Outgoing FC: %d\n",
-                    tsAplAib->psAplDeviceKeyPairTable->psAplApsKeyDescriptorEntry[i].u32OutgoingFrameCounter);
+                    psAplAib->psAplDeviceKeyPairTable->psAplApsKeyDescriptorEntry[i].u32OutgoingFrameCounter);
     }
 }
 #endif

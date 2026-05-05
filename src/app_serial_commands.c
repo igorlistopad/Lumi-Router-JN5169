@@ -52,7 +52,7 @@ PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Dat
 PRIVATE uint8 au8LinkRxBuffer[MAX_PACKET_SIZE];
 PRIVATE uint16 u16PacketType;
 PRIVATE uint16 u16PacketLength;
-PRIVATE uint32 sStorage;
+PRIVATE uint32 u32CriticalSectionStorage;
 
 /**
  * @brief Task that obtains a message from the serial Rx message queue.
@@ -78,14 +78,14 @@ PUBLIC void APP_WriteMessageToSerial(const char *message)
 }
 
 /**
- * @brief Processes the received character
+ * @brief Process a received serial character
  */
 PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 {
     static APP_teRxState eRxState = E_STATE_RX_WAIT_START;
     static uint8 u8CRC;
     static uint16 u16Bytes;
-    static bool bInEsc = FALSE;
+    static bool_t bInEsc = FALSE;
 
     switch (u8Char) {
     case SL_START_CHAR:
@@ -182,7 +182,7 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 }
 
 /**
- * @brief Processed the received command
+ * @brief Process the received serial command
  */
 PRIVATE void APP_vProcessCommand(void)
 {
@@ -210,7 +210,7 @@ PRIVATE void APP_vProcessCommand(void)
  */
 PRIVATE void APP_vWriteTxChar(uint8 u8Char)
 {
-    ZPS_eEnterCriticalSection(NULL, &sStorage);
+    ZPS_eEnterCriticalSection(NULL, &u32CriticalSectionStorage);
 
     if (UART_bTxReady() && ZQ_bQueueIsEmpty(&APP_msgSerialTx)) {
         /* send byte now and enable irq */
@@ -221,7 +221,7 @@ PRIVATE void APP_vWriteTxChar(uint8 u8Char)
         ZQ_bQueueSend(&APP_msgSerialTx, &u8Char);
     }
 
-    ZPS_eExitCriticalSection(NULL, &sStorage);
+    ZPS_eExitCriticalSection(NULL, &u32CriticalSectionStorage);
 }
 
 /**
@@ -229,7 +229,7 @@ PRIVATE void APP_vWriteTxChar(uint8 u8Char)
  */
 PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Data)
 {
-    int n;
+    uint16 n;
     uint8 u8CRC;
 
     u8CRC = u16Type & 0xff;
@@ -241,5 +241,5 @@ PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Dat
         u8CRC ^= pu8Data[n];
     }
 
-    return (u8CRC);
+    return u8CRC;
 }

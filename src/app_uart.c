@@ -30,7 +30,7 @@ PRIVATE uint8 au8UartHwTxFifo[MAX_TX_BUFFER];
 PRIVATE uint8 au8UartHwRxFifo[MAX_RX_BUFFER];
 
 /**
- * @brief Initialising UART
+ * @brief Initialise the UART peripheral
  */
 PUBLIC void UART_vInit(void)
 {
@@ -44,7 +44,7 @@ PUBLIC void UART_vInit(void)
     vAHI_UartReset(UART, FALSE, FALSE);
 
     /* Set the clock divisor register to give required baud, this has to be done
-       directly as the normal routines (in ROM) do not support all baud rates */
+     * directly as the normal routines (in ROM) do not support all baud rates */
     UART_vSetBaudRate(UART_BAUD_RATE);
 
     vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, FALSE);
@@ -54,9 +54,9 @@ PUBLIC void UART_vInit(void)
 }
 
 /**
- * @brief Handle interrupts from uart
+ * @brief Handle interrupts from UART
  */
-PUBLIC void APP_isrUart(void)
+PUBLIC void UART_vIsr(void)
 {
     uint8 u8Byte;
     uint8 u8IntStatus = u8AHI_UartReadInterruptStatus(UART);
@@ -86,9 +86,9 @@ PUBLIC void UART_vTxChar(uint8 u8Char)
 }
 
 /**
- * @brief Read line status
+ * @brief Check if the UART transmitter is ready
  */
-PUBLIC bool_t UART_bTxReady()
+PUBLIC bool_t UART_bTxReady(void)
 {
     return u8AHI_UartReadLineStatus(UART) & E_AHI_UART_LS_THRE;
 }
@@ -102,7 +102,7 @@ PUBLIC void UART_vSetTxInterrupt(bool_t bState)
 }
 
 /**
- * @brief Set baud rates UART
+ * @brief Set UART baud rate
  */
 PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate)
 {

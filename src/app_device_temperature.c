@@ -1,6 +1,6 @@
 /**
  * @file  app_device_temperature.c
- * @brief Set of functions/task for read device temperature
+ * @brief Set of functions/task for reading device temperature
  */
 
 #include <jendefs.h>
@@ -26,7 +26,7 @@ PRIVATE int16 APP_i16GetDeviceTemperature(void);
 PRIVATE int16 APP_i16ConvertChipTemp(uint16 u16AdcValue);
 
 /**
- * @brief Init Device Temperature
+ * @brief Initialise the device temperature sensor
  */
 PUBLIC void APP_vDeviceTemperatureInit(void)
 {
@@ -48,7 +48,7 @@ PUBLIC void APP_vDeviceTemperatureInit(void)
 }
 
 /**
- * @brief CallBack For Device Temperature Update timer
+ * @brief Callback for Device Temperature update timer
  */
 PUBLIC void APP_cbTimerDeviceTemperatureUpdate(void *pvParam)
 {
@@ -57,7 +57,7 @@ PUBLIC void APP_cbTimerDeviceTemperatureUpdate(void *pvParam)
 }
 
 /**
- * @brief Device Temperature update
+ * @brief Update the device temperature attribute
  */
 PRIVATE void APP_vDeviceTemperatureUpdate(void)
 {

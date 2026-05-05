@@ -45,16 +45,16 @@ PUBLIC void APP_ZCL_vInitialise(void)
 {
     teZCL_Status eZCL_Status;
 
-    /* Initialise ZLL */
+    /* Initialise ZCL */
     eZCL_Status = eZCL_Initialise(&APP_ZCL_cbGeneralCallback, apduZCL);
     if (eZCL_Status != E_ZCL_SUCCESS) {
-        DBG_vPrintf(TRACE_ZCL, "Err: eZLO_Initialise:%d\n", eZCL_Status);
+        DBG_vPrintf(TRACE_ZCL, "Error: eZCL_Initialise failed: %d\n", eZCL_Status);
     }
 
     /* Start the tick timer */
     ZTIMER_eStart(u8TimerTick, ZCL_TICK_TIME);
 
-    /* Register Light EndPoint */
+    /* Register Router EndPoint */
     eZCL_Status = APP_ZCL_eRegisterEndPoint(&APP_ZCL_cbEndpointCallback, &sLumiRouter);
     if (eZCL_Status != E_ZCL_SUCCESS) {
         DBG_vPrintf(TRACE_ZCL, "Error: APP_ZCL_eRegisterEndPoint: %02x\n", eZCL_Status);
@@ -64,20 +64,20 @@ PUBLIC void APP_ZCL_vInitialise(void)
 }
 
 /**
- * @brief Main ZCL processing task
+ * @brief Process ZCL events from the stack
  */
 PUBLIC void APP_ZCL_vEventHandler(ZPS_tsAfEvent *psStackEvent)
 {
     tsZCL_CallBackEvent sCallBackEvent;
     sCallBackEvent.pZPSevent = psStackEvent;
 
-    DBG_vPrintf(TRACE_ZCL, "ZCL_Task endpoint event:%d \n", psStackEvent->eType);
+    DBG_vPrintf(TRACE_ZCL, "ZCL_Task endpoint event: %d\n", psStackEvent->eType);
     sCallBackEvent.eEventType = E_ZCL_CBET_ZIGBEE_EVENT;
     vZCL_EventHandler(&sCallBackEvent);
 }
 
 /**
- * @brief CallBack For ZCL Tick timer
+ * @brief Callback for ZCL Tick timer
  */
 PUBLIC void APP_cbTimerZclTick(void *pvParam)
 {
@@ -90,7 +90,7 @@ PUBLIC void APP_cbTimerZclTick(void *pvParam)
 }
 
 /**
- * @brief ZCL Tick
+ * @brief Generate a ZCL timer tick event
  */
 PRIVATE void APP_ZCL_vTick(void)
 {
@@ -158,7 +158,6 @@ PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent)
  */
 PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
 {
-
     switch (psEvent->eEventType) {
     case E_ZCL_CBET_LOCK_MUTEX:
         break;
@@ -202,7 +201,7 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
         break;
 
     case E_ZCL_CBET_CLUSTER_CUSTOM:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Custom Cl %04x\n", psEvent->uMessage.sClusterCustomMessage.u16ClusterId);
+        DBG_vPrintf(TRACE_ZCL, "EP EVT: Custom cluster %04x\n", psEvent->uMessage.sClusterCustomMessage.u16ClusterId);
         APP_ZCL_vHandleClusterCustomCommands(psEvent);
         break;
 
@@ -210,7 +209,7 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
         DBG_vPrintf(TRACE_ZCL, "EP EVT: Write Individual Attribute Status %02x\n", psEvent->eZCL_Status);
         break;
 
-    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTE: {
+    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTE:
         tsZCL_IndividualAttributesResponse *psIndividualAttributeResponse =
             &psEvent->uMessage.sIndividualAttributeResponse;
         DBG_vPrintf(TRACE_ZCL,
@@ -219,9 +218,9 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
         DBG_vPrintf(TRACE_ZCL, "eAttributeDataType = %d\n", psIndividualAttributeResponse->eAttributeDataType);
         DBG_vPrintf(TRACE_ZCL, "u16AttributeEnum = %d\n", psIndividualAttributeResponse->u16AttributeEnum);
         DBG_vPrintf(TRACE_ZCL, "eAttributeStatus = %d\n", psIndividualAttributeResponse->eAttributeStatus);
-    } break;
+        break;
 
-    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTES_CONFIGURE: {
+    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTES_CONFIGURE:
         tsZCL_AttributeReportingConfigurationRecord *psAttributeReportingRecord =
             &psEvent->uMessage.sAttributeReportingConfigurationRecord;
         DBG_vPrintf(
@@ -235,7 +234,6 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
             psAttributeReportingRecord->u16TimeoutPeriodField,
             psAttributeReportingRecord->u8DirectionIsReceived,
             psAttributeReportingRecord->uAttributeReportableChange);
-
         if (E_ZCL_SUCCESS == psEvent->eZCL_Status) {
             APP_vSaveReportableRecord(psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum,
                                       psAttributeReportingRecord);
@@ -245,7 +243,7 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
                                       psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum,
                                       psAttributeReportingRecord);
         }
-    } break;
+        break;
 
     case E_ZCL_CBET_CLUSTER_UPDATE:
         DBG_vPrintf(TRACE_ZCL, "Update Id %04x\n", psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum);
@@ -278,7 +276,7 @@ PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent)
 }
 
 /**
- * @brief Register ZLO endpoints
+ * @brief Register application endpoint with ZCL
  */
 PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCallBack, APP_tsLumiRouter *psDeviceInfo)
 {
@@ -314,7 +312,7 @@ PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCall
 }
 
 /**
- * @brief ZCL specific initialization
+ * @brief Initialise ZCL device-specific attributes
  */
 PRIVATE void APP_ZCL_vDeviceSpecific_Init(void)
 {

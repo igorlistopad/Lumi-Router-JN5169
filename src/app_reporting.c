@@ -35,10 +35,10 @@ typedef struct {
 PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum);
 PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport);
 
-/* Just Two reports for time being */
+/* One report: Device Temperature Configuration */
 PRIVATE APP_tsReports asSavedReports[ZCL_NUMBER_OF_REPORTS];
 
-/* define the default reports */
+/* Define the default reports */
 PRIVATE APP_tsReports asDefaultReports[ZCL_NUMBER_OF_REPORTS] = {
     {
         GENERAL_CLUSTER_ID_DEVICE_TEMPERATURE_CONFIGURATION,
@@ -65,9 +65,8 @@ PUBLIC PDM_teStatus APP_eRestoreReports(void)
         PDM_eReadDataFromRecord(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports), &u16ByteRead);
 
     DBG_vPrintf(TRACE_REPORT, "eStatusReportReload = %d\n", eStatusReportReload);
-    /* Restore any application data previously saved to flash */
 
-    return (eStatusReportReload);
+    return eStatusReportReload;
 }
 
 /**
@@ -75,12 +74,12 @@ PUBLIC PDM_teStatus APP_eRestoreReports(void)
  */
 PUBLIC void APP_vMakeSupportedAttributesReportable(void)
 {
-    int i;
+    uint8 i;
     uint16 u16AttributeEnum;
     uint16 u16ClusterId;
     tsZCL_AttributeReportingConfigurationRecord *psAttributeReportingConfigurationRecord;
 
-    DBG_vPrintf(TRACE_REPORT, "MAKE Reportable ep %d\n", LUMIROUTER_APPLICATION_ENDPOINT);
+    DBG_vPrintf(TRACE_REPORT, "Make reportable ep %d\n", LUMIROUTER_APPLICATION_ENDPOINT);
 
     for (i = 0; i < ZCL_NUMBER_OF_REPORTS; i++) {
         u16AttributeEnum = asSavedReports[i].sAttributeReportingConfigurationRecord.u16AttributeEnum;
@@ -101,7 +100,7 @@ PUBLIC void APP_vMakeSupportedAttributesReportable(void)
  */
 PUBLIC void APP_vLoadDefaultConfigForReportable(void)
 {
-    int i;
+    uint8 i;
 
     DBG_vPrintf(TRACE_REPORT, "Loading default configuration for reports\n");
 
@@ -112,7 +111,7 @@ PUBLIC void APP_vLoadDefaultConfigForReportable(void)
         APP_vPrintReportRecord(&asSavedReports[i]);
     }
 
-    /* Save this Records */
+    /* Save these records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 
@@ -131,7 +130,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
 
     DBG_vPrintf(TRACE_REPORT, "Save to report %d\n", u8Index);
 
-    /* For CurrentLevel attribute in LevelControl Cluster */
+    /* Update the reportable record with new configuration */
     asSavedReports[u8Index].u16ClusterID = u16ClusterID;
     memcpy(&(asSavedReports[u8Index].sAttributeReportingConfigurationRecord),
            psAttributeReportingConfigurationRecord,
@@ -139,12 +138,12 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
 
     APP_vPrintReportRecord(&asSavedReports[u8Index]);
 
-    /* Save this Records */
+    /* Save these records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 
 /**
- * @brief Restore Default Record
+ * @brief Restore default record
  */
 PUBLIC void
 APP_vRestoreDefaultRecord(uint8 u8EndPointID,
@@ -171,7 +170,7 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
 
     APP_vPrintReportRecord(&asSavedReports[u8Index]);
 
-    /* Save this Records */
+    /* Save these records */
     PDM_eSaveRecordData(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports));
 }
 

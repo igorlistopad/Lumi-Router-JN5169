@@ -4,6 +4,7 @@ BasedOnStyle: LLVM
 AlignConsecutiveBitFields: true
 AlignConsecutiveMacros: true
 AllowAllArgumentsOnNextLine: false
+AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 BinPackArguments: false
 BinPackParameters: false

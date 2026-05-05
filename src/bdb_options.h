@@ -12,24 +12,24 @@
 #define BDB_PRIMARY_CHANNEL_SET       (0x02108800)
 #define BDB_SECONDARY_CHANNEL_SET     (0x07FFF800 ^ BDB_PRIMARY_CHANNEL_SET)
 #define BDBC_TL_PRIMARY_CHANNEL_SET   (0x02108800)
-#define BDBC_TL_SECONDARY_CHANNEL_SET (0x07fff800 ^ BDBC_TL_PRIMARY_CHANNEL_SET)
+#define BDBC_TL_SECONDARY_CHANNEL_SET (0x07FFF800 ^ BDBC_TL_PRIMARY_CHANNEL_SET)
 #else
 #warning Single channel only!
 #define BDB_PRIMARY_CHANNEL_SET       (1 << SINGLE_CHANNEL)
 #define BDB_SECONDARY_CHANNEL_SET     (0)
 #define BDBC_TL_PRIMARY_CHANNEL_SET   (0x02108800)
-#define BDBC_TL_SECONDARY_CHANNEL_SET (0x07fff800 ^ BDBC_TL_PRIMARY_CHANNEL_SET)
+#define BDBC_TL_SECONDARY_CHANNEL_SET (0x07FFF800 ^ BDBC_TL_PRIMARY_CHANNEL_SET)
 #endif
 
 /* BDB Constants used by all nodes
-   Note - Must not change for final app */
+ * Note - Must not change for final app */
 #define BDBC_MAX_SAME_NETWORK_RETRY_ATTEMPTS (10)
 #define BDBC_MIN_COMMISSIONING_TIME          (180)
 #define BDBC_REC_SAME_NETWORK_RETRY_ATTEMPTS (3)
 #define BDBC_TC_LINK_KEY_EXCHANGE_TIMEOUT    (5)
 
 /* BDB Constants used by nodes supporting touchlink
-   Note - Must not change for final app */
+ * Note - Must not change for final app */
 #define BDBC_TL_INTERPAN_TRANS_ID_LIFETIME (8)
 #define BDBC_TL_MIN_STARTUP_DELAY_TIME     (2)
 #define BDBC_TL_RX_WINDOW_DURATION         (5)

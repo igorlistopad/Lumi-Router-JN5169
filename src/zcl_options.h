@@ -9,21 +9,21 @@
 #include <jendefs.h>
 
 /**
- * @brief ZCL Specific initialization 
+ * @brief ZCL Specific initialization
  */
 #define ZCL_MANUFACTURER_CODE 0x1037
 
 /* Number of endpoints supported by this device */
 #define ZCL_NUMBER_OF_ENDPOINTS 1
 
-/* ZCL has all cooperative task */
+/* ZCL has all cooperative tasks */
 #define COOPERATIVE
 
-/* Set this True to disable non error default responses from clusters */
+/* Set this True to disable non-error default responses from clusters */
 #define ZCL_DISABLE_DEFAULT_RESPONSES (TRUE)
 #define ZCL_DISABLE_APS_ACK           (TRUE)
 
-/* Which Custom commands needs to be supported */
+/* Which custom commands need to be supported */
 #define ZCL_ATTRIBUTE_READ_SERVER_SUPPORTED
 #define ZCL_ATTRIBUTE_WRITE_SERVER_SUPPORTED
 
@@ -35,7 +35,10 @@
 #define ZCL_SYSTEM_MAX_REPORT_INTERVAL 60
 
 /* Reporting related configuration */
-enum { REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT = 0, NUMBER_OF_REPORTS };
+enum {
+    REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT = 0,
+    NUMBER_OF_REPORTS
+};
 
 #define ZCL_NUMBER_OF_REPORTS NUMBER_OF_REPORTS
 #define MIN_REPORT_INTERVAL   300
@@ -50,14 +53,10 @@ enum { REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT = 0, NUMBER_OF_REPORTS };
 
 /**
  * @brief Enable Cluster
- * @note  Enable cluster and their client or server instances
+ * @note  Enables clusters and their client or server instances
  */
 #define CLD_BASIC
 #define BASIC_SERVER
-
-/* Fixing a build error
- * Due to an error in the SDK
- * JN-SW-4170/Components/ZCL/Devices/ZHA/Generic/Source/plug_control.c:157 */
 #define DEVICE_TEMPERATURE_CONFIGURATION_SERVER
 
 /**

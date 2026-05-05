@@ -1,6 +1,6 @@
 /**
  * @file  app_device_temperature.h
- * @brief Set of functions/task for read device temperature
+ * @brief Set of functions/task for reading device temperature
  */
 
 #ifndef APP_DEVICE_TEMPERATURE_H
