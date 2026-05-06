@@ -41,7 +41,7 @@ PUBLIC void vAppMain(void)
         ;
 
     /* Move CPU to 32 MHz; vAHI_OptimiseWaitStates automatically called */
-    bAHI_SetClockRate(3);
+    bAHI_SetClockRate(E_AHI_XTAL_32MHZ);
 
 #ifdef UART_DEBUGGING
     /* Initialise the debug diagnostics module to use UART1 at 115K Baud */
