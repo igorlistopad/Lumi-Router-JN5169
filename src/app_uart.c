@@ -4,7 +4,6 @@
  */
 
 #include <jendefs.h>
-#include <stdlib.h>
 
 /* Application */
 #include "app_main.h"
@@ -22,7 +21,7 @@
 #define UART           E_AHI_UART_0
 #define UART_BAUD_RATE 115200
 #define MAX_TX_BUFFER  16
-#define MAX_RX_BUFFER  255
+#define MAX_RX_BUFFER  64
 
 PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate);
 
@@ -49,8 +48,6 @@ PUBLIC void UART_vInit(void)
 
     vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, FALSE);
     vAHI_UartSetInterrupt(UART, FALSE, FALSE, FALSE, TRUE, E_AHI_UART_FIFO_LEVEL_1);
-
-    DBG_vPrintf(TRACE_UART, "Done\n");
 }
 
 /**
@@ -63,7 +60,9 @@ PUBLIC void UART_vIsr(void)
 
     if (u8IntStatus & E_AHI_UART_RXDATA_MASK) {
         u8Byte = u8AHI_UartReadData(UART);
-        ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte);
+        if (!ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte)) {
+            DBG_vPrintf(TRACE_UART, "UART: RX queue overflow\n");
+        }
     }
     else if (u8IntStatus & E_AHI_UART_TX_MASK) {
         if (ZQ_bQueueReceive(&APP_msgSerialTx, &u8Byte)) {
@@ -90,7 +89,7 @@ PUBLIC void UART_vTxChar(uint8 u8Char)
  */
 PUBLIC bool_t UART_bTxReady(void)
 {
-    return u8AHI_UartReadLineStatus(UART) & E_AHI_UART_LS_THRE;
+    return (bool_t)(u8AHI_UartReadLineStatus(UART) & E_AHI_UART_LS_THRE);
 }
 
 /**
@@ -112,12 +111,12 @@ PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate)
     uint32 u32CalcBaudRate = 0;
     int32 i32BaudError = 0x7FFFFFFF;
 
-    while (abs(i32BaudError) > (int32)(u32BaudRate >> 4)) {
+    while ((i32BaudError < 0 ? -i32BaudError : i32BaudError) > (int32)(u32BaudRate >> 4)) {
         if (--u8ClocksPerBit < 3) {
             return;
         }
 
-        /* Calculate Divisor register = 16MHz / (16 x baud rate) */
+        /* Divisor = 16 MHz / ((ClocksPerBit + 1) x BaudRate) */
         u16Divisor = (uint16)(16000000UL / ((u8ClocksPerBit + 1) * u32BaudRate));
 
         /* Correct for rounding errors */
