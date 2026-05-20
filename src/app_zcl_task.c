@@ -209,7 +209,7 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
         DBG_vPrintf(TRACE_ZCL, "EP EVT: Write Individual Attribute Status %02x\n", psEvent->eZCL_Status);
         break;
 
-    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTE:
+    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTE: {
         tsZCL_IndividualAttributesResponse *psIndividualAttributeResponse =
             &psEvent->uMessage.sIndividualAttributeResponse;
         DBG_vPrintf(TRACE_ZCL,
@@ -218,9 +218,9 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
         DBG_vPrintf(TRACE_ZCL, "eAttributeDataType = %d\n", psIndividualAttributeResponse->eAttributeDataType);
         DBG_vPrintf(TRACE_ZCL, "u16AttributeEnum = %d\n", psIndividualAttributeResponse->u16AttributeEnum);
         DBG_vPrintf(TRACE_ZCL, "eAttributeStatus = %d\n", psIndividualAttributeResponse->eAttributeStatus);
-        break;
+    } break;
 
-    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTES_CONFIGURE:
+    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTES_CONFIGURE: {
         tsZCL_AttributeReportingConfigurationRecord *psAttributeReportingRecord =
             &psEvent->uMessage.sAttributeReportingConfigurationRecord;
         DBG_vPrintf(
@@ -243,7 +243,7 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
                                       psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum,
                                       psAttributeReportingRecord);
         }
-        break;
+    } break;
 
     case E_ZCL_CBET_CLUSTER_UPDATE:
         DBG_vPrintf(TRACE_ZCL, "Update Id %04x\n", psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum);
