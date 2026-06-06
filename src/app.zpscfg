@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<zpscfg:ZigbeeWirelessNetwork xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zpscfg="http://www.nxp.com/zpscfg" DefaultExtendedPANId="0x1234567887654321" MaxNumberNodes="36" Version="1.1" DefaultSecurityEnabled="true">
+<zpscfg:ZigbeeWirelessNetwork xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zpscfg="http://www.nxp.com/zpscfg" DefaultExtendedPANId="0x0000000000000000" MaxNumberNodes="36" Version="1.1" DefaultSecurityEnabled="true">
     <Profiles Name="ZDP" Id="0x0000">
         <Clusters Name="NWK_addr_req" Id="0x0000"/>
         <Clusters Name="IEEE_addr_req" Id="0x0001"/>
