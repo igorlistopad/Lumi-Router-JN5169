@@ -32,7 +32,6 @@
 PRIVATE void APP_ZCL_vTick(void);
 PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent);
 PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent);
-PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent);
 PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCallBack, APP_tsLumiRouter *psDeviceInfo);
 PRIVATE void APP_ZCL_vDeviceSpecific_Init(void);
 
@@ -202,7 +201,6 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
 
     case E_ZCL_CBET_CLUSTER_CUSTOM:
         DBG_vPrintf(TRACE_ZCL, "EP EVT: Custom cluster %04x\n", psEvent->uMessage.sClusterCustomMessage.u16ClusterId);
-        APP_ZCL_vHandleClusterCustomCommands(psEvent);
         break;
 
     case E_ZCL_CBET_WRITE_INDIVIDUAL_ATTRIBUTE:
@@ -255,23 +253,6 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
     default:
         DBG_vPrintf(TRACE_ZCL, "EP EVT: Invalid evt type 0x%x\n", (uint8)psEvent->eEventType);
         break;
-    }
-}
-
-/**
- * @brief Callback for ZCL cluster custom command events
- */
-PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent)
-{
-    if (psEvent->uMessage.sClusterCustomMessage.u16ClusterId == GENERAL_CLUSTER_ID_BASIC) {
-        tsCLD_BasicCallBackMessage *psCallBackMessage =
-            (tsCLD_BasicCallBackMessage *)psEvent->uMessage.sClusterCustomMessage.pvCustomData;
-        if (psCallBackMessage->u8CommandId == E_CLD_BASIC_CMD_RESET_TO_FACTORY_DEFAULTS) {
-            DBG_vPrintf(TRACE_ZCL, "Basic Factory Reset Received\n");
-            memset(&sLumiRouter, 0, sizeof(APP_tsLumiRouter));
-            APP_ZCL_eRegisterEndPoint(&APP_ZCL_cbEndpointCallback, &sLumiRouter);
-            APP_ZCL_vDeviceSpecific_Init();
-        }
     }
 }
 
