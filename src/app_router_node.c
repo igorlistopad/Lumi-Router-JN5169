@@ -338,6 +338,7 @@ PRIVATE void APP_vFactoryResetRecords(void)
     /* save everything */
     eNodeState = E_STARTUP;
     PDM_eSaveRecordData(PDM_ID_APP_ROUTER, &eNodeState, sizeof(APP_teNodeState));
+    APP_vLoadDefaultConfigForReportable();
     ZPS_vSaveAllZpsRecords();
 }
 
