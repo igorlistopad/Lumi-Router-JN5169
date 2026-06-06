@@ -21,7 +21,6 @@
 
 /* Set this True to disable non-error default responses from clusters */
 #define ZCL_DISABLE_DEFAULT_RESPONSES (TRUE)
-#define ZCL_DISABLE_APS_ACK           (TRUE)
 
 /* Which custom commands need to be supported */
 #define ZCL_ATTRIBUTE_READ_SERVER_SUPPORTED
