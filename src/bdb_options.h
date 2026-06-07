@@ -28,13 +28,6 @@
 #define BDBC_REC_SAME_NETWORK_RETRY_ATTEMPTS (3)
 #define BDBC_TC_LINK_KEY_EXCHANGE_TIMEOUT    (5)
 
-/* BDB Constants used by nodes supporting touchlink
- * Note - Must not change for final app */
-#define BDBC_TL_INTERPAN_TRANS_ID_LIFETIME (8)
-#define BDBC_TL_MIN_STARTUP_DELAY_TIME     (2)
-#define BDBC_TL_RX_WINDOW_DURATION         (5)
-#define BDBC_TL_SCAN_TIME_BASE_DURATION_MS (250)
-
 /* BDB Attribute values */
 #define BDB_COMMISSIONING_GROUP_ID     (0xFFFF)
 #define BDB_COMMISSIONING_MODE         (BDB_COMMISSIONING_MODE_NWK_STEERING)
