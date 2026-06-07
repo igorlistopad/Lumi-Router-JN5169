@@ -124,7 +124,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
 {
     uint8 u8Index = APP_u8GetRecordIndex(u16ClusterID, psAttributeReportingConfigurationRecord->u16AttributeEnum);
 
-    if (u8Index == 0xFF) {
+    if (u8Index == 0xFF || u8Index >= ZCL_NUMBER_OF_REPORTS) {
         return;
     }
 
@@ -152,7 +152,7 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
 {
     uint8 u8Index = APP_u8GetRecordIndex(u16ClusterID, psAttributeReportingConfigurationRecord->u16AttributeEnum);
 
-    if (u8Index == 0xFF) {
+    if (u8Index == 0xFF || u8Index >= ZCL_NUMBER_OF_REPORTS) {
         return;
     }
 
