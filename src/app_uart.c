@@ -19,11 +19,8 @@
 #endif
 
 #define UART           E_AHI_UART_0
-#define UART_BAUD_RATE 115200
 #define MAX_TX_BUFFER  16
 #define MAX_RX_BUFFER  64
-
-PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate);
 
 PRIVATE uint8 au8UartHwTxFifo[MAX_TX_BUFFER];
 PRIVATE uint8 au8UartHwRxFifo[MAX_RX_BUFFER];
@@ -42,9 +39,7 @@ PUBLIC void UART_vInit(void)
     vAHI_UartReset(UART, TRUE, TRUE);
     vAHI_UartReset(UART, FALSE, FALSE);
 
-    /* Set the clock divisor register to give required baud, this has to be done
-     * directly as the normal routines (in ROM) do not support all baud rates */
-    UART_vSetBaudRate(UART_BAUD_RATE);
+    vAHI_UartSetBaudRate(UART, E_AHI_UART_RATE_115200);
 
     vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, FALSE);
     vAHI_UartSetInterrupt(UART, FALSE, FALSE, FALSE, TRUE, E_AHI_UART_FIFO_LEVEL_1);
@@ -85,11 +80,11 @@ PUBLIC void UART_vTxChar(uint8 u8Char)
 }
 
 /**
- * @brief Check if the UART transmitter is ready
+ * @brief Check if the UART transmitter is ready (TX FIFO empty)
  */
 PUBLIC bool_t UART_bTxReady(void)
 {
-    return (bool_t)(u8AHI_UartReadLineStatus(UART) & E_AHI_UART_LS_THRE);
+    return (bool_t)(u16AHI_UartReadTxFifoLevel(UART) == 0);
 }
 
 /**
@@ -98,42 +93,4 @@ PUBLIC bool_t UART_bTxReady(void)
 PUBLIC void UART_vSetTxInterrupt(bool_t bState)
 {
     vAHI_UartSetInterrupt(UART, FALSE, FALSE, bState, TRUE, E_AHI_UART_FIFO_LEVEL_1);
-}
-
-/**
- * @brief Set UART baud rate
- */
-PRIVATE void UART_vSetBaudRate(uint32 u32BaudRate)
-{
-    uint16 u16Divisor = 0;
-    uint32 u32Remainder;
-    uint8 u8ClocksPerBit = 16;
-    uint32 u32CalcBaudRate = 0;
-    int32 i32BaudError = 0x7FFFFFFF;
-
-    while ((i32BaudError < 0 ? -i32BaudError : i32BaudError) > (int32)(u32BaudRate >> 4)) {
-        if (--u8ClocksPerBit < 3) {
-            return;
-        }
-
-        /* Divisor = 16 MHz / ((ClocksPerBit + 1) x BaudRate) */
-        u16Divisor = (uint16)(16000000UL / ((u8ClocksPerBit + 1) * u32BaudRate));
-
-        /* Correct for rounding errors */
-        u32Remainder = (uint32)(16000000UL % ((u8ClocksPerBit + 1) * u32BaudRate));
-
-        if (u32Remainder >= (((u8ClocksPerBit + 1) * u32BaudRate) / 2)) {
-            u16Divisor += 1;
-        }
-
-        u32CalcBaudRate = (16000000UL / ((u8ClocksPerBit + 1) * u16Divisor));
-
-        i32BaudError = (int32)u32CalcBaudRate - (int32)u32BaudRate;
-    }
-
-    /* Set the calculated clocks per bit */
-    vAHI_UartSetClocksPerBit(UART, u8ClocksPerBit);
-
-    /* Set the calculated divisor */
-    vAHI_UartSetBaudDivisor(UART, u16Divisor);
 }
