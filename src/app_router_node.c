@@ -26,7 +26,7 @@
 #include "mac_vs_sap.h"
 #include "pdum_apl.h"
 #include "pdum_nwk.h"
-#include "pwrm.h"
+
 #include "zps_apl_af.h"
 #include "zps_apl_aib.h"
 #include "zps_apl_aps.h"
