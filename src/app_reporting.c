@@ -19,7 +19,6 @@
 #include "PDM.h"
 #include "dbg.h"
 #include "zcl.h"
-#include "zcl_common.h"
 
 #ifndef TRACE_REPORT
 #define TRACE_REPORT FALSE
@@ -39,7 +38,7 @@ PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport);
 PRIVATE APP_tsReports asSavedReports[ZCL_NUMBER_OF_REPORTS];
 
 /* Define the default reports */
-PRIVATE APP_tsReports asDefaultReports[ZCL_NUMBER_OF_REPORTS] = {
+PRIVATE const APP_tsReports asDefaultReports[ZCL_NUMBER_OF_REPORTS] = {
     {
         GENERAL_CLUSTER_ID_DEVICE_TEMPERATURE_CONFIGURATION,
         {
@@ -181,7 +180,8 @@ PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
 {
     uint8 u8Index = 0xFF;
 
-    if (u16ClusterID == GENERAL_CLUSTER_ID_DEVICE_TEMPERATURE_CONFIGURATION) {
+    if ((u16ClusterID == GENERAL_CLUSTER_ID_DEVICE_TEMPERATURE_CONFIGURATION) &&
+        (u16AttributeEnum == E_CLD_DEVTEMPCFG_ATTR_ID_CURRENT_TEMPERATURE)) {
         u8Index = REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT;
     }
 
