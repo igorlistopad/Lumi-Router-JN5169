@@ -48,7 +48,7 @@ PRIVATE const APP_tsReports asDefaultReports[ZCL_NUMBER_OF_REPORTS] = {
             MIN_REPORT_INTERVAL,
             MAX_REPORT_INTERVAL,
             0,
-            {DEVICE_TEMPERATURE_MINIMUM_REPORTABLE_CHANGE},
+            {.zint16ReportableChange = DEVICE_TEMPERATURE_MINIMUM_REPORTABLE_CHANGE},
         },
     },
 };
