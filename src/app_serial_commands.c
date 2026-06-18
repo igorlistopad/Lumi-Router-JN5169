@@ -44,14 +44,17 @@ typedef enum {
     E_SC_MSG_ERASE_PERSISTENT_DATA = 0x0012
 } APP_teSerialCommandType;
 
+typedef struct {
+    uint16 u16PacketType;
+    uint16 u16PacketLength;
+    uint8 au8Data[MAX_PACKET_SIZE];
+} APP_tsRxPacket;
+
 PRIVATE void APP_vProcessRxChar(uint8 u8Char);
-PRIVATE void APP_vProcessCommand(void);
+PRIVATE void APP_vProcessCommand(const APP_tsRxPacket *psPacket);
 PRIVATE void APP_vWriteTxChar(uint8 u8Char);
 PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Data);
 
-PRIVATE uint8 au8LinkRxBuffer[MAX_PACKET_SIZE];
-PRIVATE uint16 u16PacketType;
-PRIVATE uint16 u16PacketLength;
 PRIVATE uint32 u32CriticalSectionStorage;
 
 /**
@@ -60,7 +63,7 @@ PRIVATE uint32 u32CriticalSectionStorage;
 PUBLIC void APP_taskAtSerial(void)
 {
     uint8 u8RxByte;
-    if (ZQ_bQueueReceive(&APP_msgSerialRx, &u8RxByte)) {
+    while (ZQ_bQueueReceive(&APP_msgSerialRx, &u8RxByte)) {
         APP_vProcessRxChar(u8RxByte);
     }
 }
@@ -86,14 +89,15 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
     static uint8 u8CRC;
     static uint16 u16Bytes;
     static bool_t bInEsc = FALSE;
+    static APP_tsRxPacket sRxPacket;
 
     switch (u8Char) {
     case SL_START_CHAR:
         /* Reset state machine and all parse state */
         u8CRC = 0;
         u16Bytes = 0;
-        u16PacketType = 0;
-        u16PacketLength = 0;
+        sRxPacket.u16PacketType = 0;
+        sRxPacket.u16PacketLength = 0;
         bInEsc = FALSE;
         DBG_vPrintf(TRACE_SERIAL, "RX Start\n");
         eRxState = E_STATE_RX_WAIT_TYPEMSB;
@@ -112,11 +116,15 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
         /* End message */
         DBG_vPrintf(TRACE_SERIAL, "Got END\n");
         eRxState = E_STATE_RX_WAIT_START;
-        if (u16PacketLength < MAX_PACKET_SIZE) {
-            if (u8CRC == APP_u8CalculateCRC(u16PacketType, u16PacketLength, au8LinkRxBuffer)) {
+        if (sRxPacket.u16PacketLength <= MAX_PACKET_SIZE) {
+            if (u8CRC == APP_u8CalculateCRC(sRxPacket.u16PacketType, sRxPacket.u16PacketLength, sRxPacket.au8Data)) {
                 /* CRC matches - valid packet */
-                DBG_vPrintf(TRACE_SERIAL, "APP_vProcessRxChar(%d, %d, %02x)\n", u16PacketType, u16PacketLength, u8CRC);
-                APP_vProcessCommand();
+                DBG_vPrintf(TRACE_SERIAL,
+                            "APP_vProcessRxChar(%d, %d, %02x)\n",
+                            sRxPacket.u16PacketType,
+                            sRxPacket.u16PacketLength,
+                            u8CRC);
+                APP_vProcessCommand(&sRxPacket);
             }
             else {
                 DBG_vPrintf(TRACE_SERIAL, "CRC BAD\n");
@@ -137,25 +145,25 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
             break;
 
         case E_STATE_RX_WAIT_TYPEMSB:
-            u16PacketType = (uint16)u8Char << 8;
+            sRxPacket.u16PacketType = (uint16)u8Char << 8;
             eRxState++;
             break;
 
         case E_STATE_RX_WAIT_TYPELSB:
-            u16PacketType += (uint16)u8Char;
-            DBG_vPrintf(TRACE_SERIAL, "Type 0x%x\n", u16PacketType & 0xFFFF);
+            sRxPacket.u16PacketType += (uint16)u8Char;
+            DBG_vPrintf(TRACE_SERIAL, "Type 0x%x\n", sRxPacket.u16PacketType & 0xFFFF);
             eRxState++;
             break;
 
         case E_STATE_RX_WAIT_LENMSB:
-            u16PacketLength = (uint16)u8Char << 8;
+            sRxPacket.u16PacketLength = (uint16)u8Char << 8;
             eRxState++;
             break;
 
         case E_STATE_RX_WAIT_LENLSB:
-            u16PacketLength += (uint16)u8Char;
-            DBG_vPrintf(TRACE_SERIAL, "Length %d\n", u16PacketLength);
-            if (u16PacketLength > MAX_PACKET_SIZE) {
+            sRxPacket.u16PacketLength += (uint16)u8Char;
+            DBG_vPrintf(TRACE_SERIAL, "Length %d\n", sRxPacket.u16PacketLength);
+            if (sRxPacket.u16PacketLength > MAX_PACKET_SIZE) {
                 DBG_vPrintf(TRACE_SERIAL, "Length > MaxLength\n");
                 eRxState = E_STATE_RX_WAIT_START;
             }
@@ -171,9 +179,9 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
             break;
 
         case E_STATE_RX_WAIT_DATA:
-            if (u16Bytes < u16PacketLength) {
+            if (u16Bytes < sRxPacket.u16PacketLength) {
                 DBG_vPrintf(TRACE_SERIAL, "%02x ", u8Char);
-                au8LinkRxBuffer[u16Bytes++] = u8Char;
+                sRxPacket.au8Data[u16Bytes++] = u8Char;
             }
             break;
         }
@@ -184,9 +192,9 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 /**
  * @brief Process the received serial command
  */
-PRIVATE void APP_vProcessCommand(void)
+PRIVATE void APP_vProcessCommand(const APP_tsRxPacket *psPacket)
 {
-    switch (u16PacketType) {
+    switch (psPacket->u16PacketType) {
     case E_SC_MSG_RESET:
         APP_WriteMessageToSerial("Reset...........");
         ZTIMER_eStart(u8TimerRestart, RESTART_DELAY_MS);
@@ -214,11 +222,13 @@ PRIVATE void APP_vWriteTxChar(uint8 u8Char)
 
     if (UART_bTxReady() && ZQ_bQueueIsEmpty(&APP_msgSerialTx)) {
         /* send byte now and enable irq */
-        UART_vSetTxInterrupt(TRUE);
         UART_vTxChar(u8Char);
+        UART_vSetTxInterrupt(TRUE);
     }
     else {
-        ZQ_bQueueSend(&APP_msgSerialTx, &u8Char);
+        if (!ZQ_bQueueSend(&APP_msgSerialTx, &u8Char)) {
+            DBG_vPrintf(TRACE_SERIAL, "TX queue overflow\n");
+        }
     }
 
     ZPS_eExitCriticalSection(NULL, &u32CriticalSectionStorage);
@@ -237,8 +247,10 @@ PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Dat
     u8CRC ^= u16Length & 0xff;
     u8CRC ^= (u16Length >> 8) & 0xff;
 
-    for (n = 0; n < u16Length; n++) {
-        u8CRC ^= pu8Data[n];
+    if (pu8Data != NULL) {
+        for (n = 0; n < u16Length; n++) {
+            u8CRC ^= pu8Data[n];
+        }
     }
 
     return u8CRC;
