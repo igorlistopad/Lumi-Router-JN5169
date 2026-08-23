@@ -57,6 +57,8 @@ PUBLIC void APP_vDeviceTemperatureInit(void)
  */
 PUBLIC void APP_cbTimerDeviceTemperatureUpdate(void *pvParam)
 {
+    (void)pvParam;
+
     APP_vDeviceTemperatureUpdate();
     ZTIMER_eStart(u8TimerDeviceTemperature, DEVICE_TEMPERATURE_UPDATE_TIME);
 }
@@ -103,20 +105,20 @@ PRIVATE int16 APP_i16GetDeviceTemperature(void)
  * @brief   Convert 10-bit ADC reading to degrees Celsius
  * @details Formula: T = 25 - (ADC10 - Typ10) * Scale10 / 1000
  *
- *          Typ10 = 614: 10-bit ADC reading at 25°C
+ *          Typ10 = 597: 10-bit ADC reading at 25°C
  *            V_sensor(25°C) = 720 mV (JN5169 datasheet Table 31)
- *            ADC range = Vref_int = 1200 mV
- *            Typ10 = (720 / 1200) × 1024 = 614.4 → 614
+ *            Vref_int(typ) = 1235 mV (JN5169 datasheet Tables 24 and 25)
+ *            Typ10 = (720 / 1235) × 1024 = 596.99 → 597
  *
- *          Scale10 = 706: temperature change per ADC10 LSB, in 0.001 °C
- *            1 LSB = 1200 / 1024 = 1.171875 mV
+ *          Scale10 = 727: temperature change per ADC10 LSB, in 0.001 °C
+ *            1 LSB = 1235 / 1024 = 1.206055 mV
  *            Sensor coefficient = −1.66 mV/°C (JN5169 datasheet Table 31)
- *            Scale10 = (1.171875 / 1.66) * 1000 = 705.94 -> 706
+ *            Scale10 = (1.206055 / 1.66) * 1000 = 726.54 -> 727
  *
  *          Max formula error: +/-1 °C (integer truncation)
  *          Sensor accuracy: +/-7 °C (JN5169 datasheet Table 31)
  */
 PRIVATE int16 APP_i16ConvertChipTemp(uint16 u16AdcValue)
 {
-    return (int16)((int32)25 - ((((int32)u16AdcValue - (int32)614) * (int32)706) / (int32)1000));
+    return (int16)((int32)25 - ((((int32)u16AdcValue - (int32)597) * (int32)727) / (int32)1000));
 }
