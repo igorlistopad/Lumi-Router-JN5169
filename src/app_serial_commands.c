@@ -24,36 +24,21 @@
 #define SL_START_CHAR    0x01
 #define SL_ESC_CHAR      0x02
 #define SL_END_CHAR      0x03
-#define MAX_PACKET_SIZE  32
-#define RESTART_DELAY_MS ZTIMER_TIME_MSEC(500)
-
-/* Enumerated list of states for receive state machine */
-typedef enum {
-    E_STATE_RX_WAIT_START,
-    E_STATE_RX_WAIT_TYPEMSB,
-    E_STATE_RX_WAIT_TYPELSB,
-    E_STATE_RX_WAIT_LENMSB,
-    E_STATE_RX_WAIT_LENLSB,
-    E_STATE_RX_WAIT_CRC,
-    E_STATE_RX_WAIT_DATA
-} APP_teRxState;
+#define SL_HEADER_SIZE    4U
+#define SL_FRAME_MIN_SIZE 5U
+#define SL_FRAME_MAX_SIZE 6U
+#define SL_RX_IDLE        0xFFU
+#define RESTART_DELAY_MS ZTIMER_TIME_MSEC(50)
 
 /* Serial link message types */
-typedef enum {
+enum {
     E_SC_MSG_RESET = 0x0011,
     E_SC_MSG_ERASE_PERSISTENT_DATA = 0x0012
-} APP_teSerialCommandType;
-
-typedef struct {
-    uint16 u16PacketType;
-    uint16 u16PacketLength;
-    uint8 au8Data[MAX_PACKET_SIZE];
-} APP_tsRxPacket;
+};
 
 PRIVATE void APP_vProcessRxChar(uint8 u8Char);
-PRIVATE void APP_vProcessCommand(const APP_tsRxPacket *psPacket);
+PRIVATE void APP_vProcessCommand(uint8 u8Command);
 PRIVATE void APP_vWriteTxChar(uint8 u8Char);
-PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Data);
 
 PRIVATE uint32 u32CriticalSectionStorage;
 
@@ -76,125 +61,81 @@ PUBLIC void APP_WriteMessageToSerial(const char *message)
     DBG_vPrintf(TRACE_SERIAL, "APP_WriteMessageToSerial(%s)\n", message);
 
     for (; *message != '\0'; message++) {
-        APP_vWriteTxChar(*message);
+        APP_vWriteTxChar((uint8)*message);
     }
 }
 
 /**
- * @brief Process a received serial character
+ * @brief Process a byte from a jntool serial command.
+ * @details Wire frame:
+ * START | escaped(type[2], length[2], checksum, data[0..1]) | END.
+ * Bytes below 0x10 are escaped as ESC followed by the byte XOR 0x10.
+ * Valid frames are passed to APP_vProcessCommand().
  */
 PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 {
-    static APP_teRxState eRxState = E_STATE_RX_WAIT_START;
-    static uint8 u8CRC;
-    static uint16 u16Bytes;
-    static bool_t bInEsc = FALSE;
-    static APP_tsRxPacket sRxPacket;
+    static uint8 au8Header[SL_HEADER_SIZE];
+    static uint8 u8FrameLength = SL_RX_IDLE;
+    static uint8 u8Checksum;
+    static bool_t bEscaped = FALSE;
 
-    switch (u8Char) {
-    case SL_START_CHAR:
-        /* Reset state machine and all parse state */
-        u8CRC = 0;
-        u16Bytes = 0;
-        sRxPacket.u16PacketType = 0;
-        sRxPacket.u16PacketLength = 0;
-        bInEsc = FALSE;
-        DBG_vPrintf(TRACE_SERIAL, "RX Start\n");
-        eRxState = E_STATE_RX_WAIT_TYPEMSB;
-        break;
-
-    case SL_ESC_CHAR:
-        /* Escape next character */
-        bInEsc = TRUE;
-        break;
-
-    case SL_END_CHAR:
-        /* Ignore stray END outside of a packet */
-        if (eRxState == E_STATE_RX_WAIT_START) {
-            break;
-        }
-        /* End message */
-        DBG_vPrintf(TRACE_SERIAL, "Got END\n");
-        eRxState = E_STATE_RX_WAIT_START;
-        if (sRxPacket.u16PacketLength <= MAX_PACKET_SIZE) {
-            if (u8CRC == APP_u8CalculateCRC(sRxPacket.u16PacketType, sRxPacket.u16PacketLength, sRxPacket.au8Data)) {
-                /* CRC matches - valid packet */
-                DBG_vPrintf(TRACE_SERIAL,
-                            "APP_vProcessRxChar(%d, %d, %02x)\n",
-                            sRxPacket.u16PacketType,
-                            sRxPacket.u16PacketLength,
-                            u8CRC);
-                APP_vProcessCommand(&sRxPacket);
-            }
-            else {
-                DBG_vPrintf(TRACE_SERIAL, "CRC BAD\n");
-            }
-        }
-        break;
-
-    default:
-        if (bInEsc) {
-            /* Unescape the character */
-            u8Char ^= 0x10;
-            bInEsc = FALSE;
-        }
-        DBG_vPrintf(TRACE_SERIAL, "Data 0x%x\n", u8Char & 0xFF);
-
-        switch (eRxState) {
-        case E_STATE_RX_WAIT_START:
-            break;
-
-        case E_STATE_RX_WAIT_TYPEMSB:
-            sRxPacket.u16PacketType = (uint16)u8Char << 8;
-            eRxState++;
-            break;
-
-        case E_STATE_RX_WAIT_TYPELSB:
-            sRxPacket.u16PacketType += (uint16)u8Char;
-            DBG_vPrintf(TRACE_SERIAL, "Type 0x%x\n", sRxPacket.u16PacketType & 0xFFFF);
-            eRxState++;
-            break;
-
-        case E_STATE_RX_WAIT_LENMSB:
-            sRxPacket.u16PacketLength = (uint16)u8Char << 8;
-            eRxState++;
-            break;
-
-        case E_STATE_RX_WAIT_LENLSB:
-            sRxPacket.u16PacketLength += (uint16)u8Char;
-            DBG_vPrintf(TRACE_SERIAL, "Length %d\n", sRxPacket.u16PacketLength);
-            if (sRxPacket.u16PacketLength > MAX_PACKET_SIZE) {
-                DBG_vPrintf(TRACE_SERIAL, "Length > MaxLength\n");
-                eRxState = E_STATE_RX_WAIT_START;
-            }
-            else {
-                eRxState++;
-            }
-            break;
-
-        case E_STATE_RX_WAIT_CRC:
-            DBG_vPrintf(TRACE_SERIAL, "CRC %02x\n", u8Char);
-            u8CRC = u8Char;
-            eRxState++;
-            break;
-
-        case E_STATE_RX_WAIT_DATA:
-            if (u16Bytes < sRxPacket.u16PacketLength) {
-                DBG_vPrintf(TRACE_SERIAL, "%02x ", u8Char);
-                sRxPacket.au8Data[u16Bytes++] = u8Char;
-            }
-            break;
-        }
-        break;
+    if (u8Char == SL_START_CHAR) {
+        u8FrameLength = 0U;
+        u8Checksum = 0U;
+        bEscaped = FALSE;
+        return;
     }
+
+    if (u8FrameLength == SL_RX_IDLE) {
+        return;
+    }
+
+    if (u8Char == SL_END_CHAR) {
+        if (!bEscaped &&
+            (u8FrameLength >= SL_FRAME_MIN_SIZE) &&
+            (u8Checksum == 0U) &&
+            (au8Header[0] == 0U) &&
+            (au8Header[2] == 0U) &&
+            (au8Header[3] == (u8FrameLength - SL_FRAME_MIN_SIZE))) {
+            APP_vProcessCommand(au8Header[1]);
+        }
+
+        u8FrameLength = SL_RX_IDLE;
+        bEscaped = FALSE;
+        return;
+    }
+
+    if (u8Char == SL_ESC_CHAR) {
+        bEscaped = TRUE;
+        return;
+    }
+
+    if (bEscaped) {
+        u8Char ^= 0x10U;
+        bEscaped = FALSE;
+    }
+
+    if (u8FrameLength >= SL_FRAME_MAX_SIZE) {
+        u8FrameLength = SL_RX_IDLE;
+        bEscaped = FALSE;
+        return;
+    }
+
+    if (u8FrameLength < SL_HEADER_SIZE) {
+        au8Header[u8FrameLength] = u8Char;
+    }
+
+    /* A valid frame XOR is zero. */
+    u8Checksum ^= u8Char;
+    u8FrameLength++;
 }
 
 /**
- * @brief Process the received serial command
+ * @brief Execute a decoded jntool command.
  */
-PRIVATE void APP_vProcessCommand(const APP_tsRxPacket *psPacket)
+PRIVATE void APP_vProcessCommand(uint8 u8Command)
 {
-    switch (psPacket->u16PacketType) {
+    switch (u8Command) {
     case E_SC_MSG_RESET:
         APP_WriteMessageToSerial("Reset...........");
         ZTIMER_eStart(u8TimerRestart, RESTART_DELAY_MS);
@@ -232,26 +173,4 @@ PRIVATE void APP_vWriteTxChar(uint8 u8Char)
     }
 
     ZPS_eExitCriticalSection(NULL, &u32CriticalSectionStorage);
-}
-
-/**
- * @brief Calculate CRC of packet
- */
-PRIVATE uint8 APP_u8CalculateCRC(uint16 u16Type, uint16 u16Length, uint8 *pu8Data)
-{
-    uint16 n;
-    uint8 u8CRC;
-
-    u8CRC = u16Type & 0xff;
-    u8CRC ^= (u16Type >> 8) & 0xff;
-    u8CRC ^= u16Length & 0xff;
-    u8CRC ^= (u16Length >> 8) & 0xff;
-
-    if (pu8Data != NULL) {
-        for (n = 0; n < u16Length; n++) {
-            u8CRC ^= pu8Data[n];
-        }
-    }
-
-    return u8CRC;
 }
