@@ -51,23 +51,29 @@ PUBLIC void UART_vInit(void)
 PUBLIC void UART_vIsr(void)
 {
     uint8 u8Byte;
-    uint8 u8IntStatus = u8AHI_UartReadInterruptStatus(UART);
+    uint8 u8InterruptId = (uint8)((u8AHI_UartReadInterruptStatus(UART) >> 1) & 0x07U);
 
-    if (u8IntStatus & E_AHI_UART_RXDATA_MASK) {
+    switch (u8InterruptId) {
+    case E_AHI_UART_INT_RXDATA:
+    case E_AHI_UART_INT_TIMEOUT:
         u8Byte = u8AHI_UartReadData(UART);
         if (!ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte)) {
-            DBG_vPrintf(TRACE_UART, "UART: RX queue overflow\n");
+            DBG_vPrintf(TRACE_UART, "UART: RX queue full, byte dropped\n");
         }
-    }
-    else if (u8IntStatus & E_AHI_UART_TX_MASK) {
+        break;
+
+    case E_AHI_UART_INT_TX:
         if (ZQ_bQueueReceive(&APP_msgSerialTx, &u8Byte)) {
-            UART_vSetTxInterrupt(TRUE);
             vAHI_UartWriteData(UART, u8Byte);
         }
         else {
-            /* disable tx interrupt as nothing to send */
+            /* Prevent repeated TX-empty interrupts while the queue is empty. */
             UART_vSetTxInterrupt(FALSE);
         }
+        break;
+
+    default:
+        break;
     }
 }
 
