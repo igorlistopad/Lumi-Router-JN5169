@@ -89,18 +89,8 @@
     </Profiles>
     <Profiles Name="HA" Id="0x0104">
         <Clusters Name="Basic" Id="0x0000"/>
-        <Clusters Name="DeviceTempCfg" Id="0x0002"/>
-        <Clusters Name="Identify" Id="0x0003"/>
-        <Clusters Name="Groups" Id="0x0004"/>
-        <Clusters Name="Scenes" Id="0x0005"/>
-        <Clusters Name="OnOff" Id="0x0006"/>
-        <Clusters Name="LevelControl" Id="0x0008"/>
-        <Clusters Name="ColourControl" Id="0x0300"/>
-        <Clusters Name="OccupancySensing" Id="0x0406"/>
-        <Clusters Name="IlluminanceMeasurement" Id="0x0400"/>
+        <Clusters Name="DeviceTemperatureConfiguration" Id="0x0002"/>
         <Clusters Name="Default" Id="0xFFFF"/>
-        <Clusters Name="OTA" Id="0x0019"/>
-        <Clusters Name="Time" Id="0x000A"/>
     </Profiles>
     <Coordinator Name="Coordinator" DiscoveryNeighbourTableSize="16" ActiveNeighbourTableSize="26" RouteDiscoveryTableSize="35" RoutingTableSize="35" BroadcastTransactionTableSize="25" RouteRecordTableSize="4" AddressMapTableSize="25" SecurityMaterialSets="2" MaxNumSimultaneousApsdeReq="5" MaxNumSimultaneousApsdeAckReq="3" MACMutexName="mutexMAC" ZPSMutexName="mutexZPS" FragmentationMaxNumSimulRx="0" FragmentationMaxNumSimulTx="0" DefaultEventMessageName="APP_vZpsEventHandler" MACDcfmIndMessage="zps_msgDcfmInd" MACTimeEventMessage="zps_msgTimeEvents" apsNonMemberRadius="2" apsDesignatedCoordinator="true" apsUseInsecureJoin="true" apsMaxWindowSize="8" apsInterframeDelay="10" APSDuplicateTableSize="5" apsSecurityTimeoutPeriod="6000" apsUseExtPANId="0x0000000000000000" SecurityEnabled="true" MACMlmeDcfmIndMessage="zps_msgMlmeDcfmInd" MACMcpsDcfmIndMessage="zps_msgMcpsDcfmInd" APSPersistenceTime="100" NumAPSMESimulCommands="4" StackProfile="2" InterPAN="false" GreenPowerSupport="false" NwkFcSaveCountBitShift="10" ApsFcSaveCountBitShift="10" MacTableSize="36" DefaultCallbackName="APP_vGenCallback" PermitJoiningTime="0" ChildTableSize="6">
         <Endpoints Id="0" Enabled="true" ApplicationDeviceId="0" ApplicationDeviceVersion="0" Profile="ZDP" Message="" Name="ZDO">
@@ -273,27 +263,13 @@
             <OutputClusters Cluster="Mgmt_NWK_Update_rsp" TxAPDUs="Coordinator->apduZDP" Discoverable="false"/>
             <OutputClusters Cluster="Parent_Annce_rsp" TxAPDUs="Coordinator->apduZDP" Discoverable="true"/>
         </Endpoints>
-        <Endpoints Id="1" Enabled="true" ApplicationDeviceId="0" ApplicationDeviceVersion="0" Profile="HA" Message="APP_ZCL_vEventHandler" Name="Application">
-            <InputClusters Cluster="Default" RxAPDU="Coordinator->apduZCL" Discoverable="false"/>
-            <InputClusters Cluster="Basic" RxAPDU="Coordinator->apduZCL" Discoverable="true"/>
-            <InputClusters Cluster="Identify" RxAPDU="Coordinator->apduZCL" Discoverable="true"/>
-            <InputClusters Cluster="Groups" RxAPDU="Coordinator->apduZCL" Discoverable="false"/>
-            <InputClusters Cluster="OnOff" RxAPDU="Coordinator->apduZCL" Discoverable="false"/>
-            <InputClusters Cluster="Default" RxAPDU="Coordinator->apduZCL" Discoverable="false"/>
-            <OutputClusters Cluster="Basic" TxAPDUs="Coordinator->apduZCL" Discoverable="true"/>
-            <OutputClusters Cluster="Identify" TxAPDUs="Coordinator->apduZCL" Discoverable="true"/>
-            <OutputClusters Cluster="Groups" TxAPDUs="Coordinator->apduZCL" Discoverable="true"/>
-            <OutputClusters Cluster="OnOff" TxAPDUs="Coordinator->apduZCL" Discoverable="true"/>
-        </Endpoints>
         <PDUConfiguration NumNPDUs="24" PDUMMutexName="mutexPDUM">
             <APDUs Id="Coordinator->apduZDP" Name="apduZDP" Size="100" Instances="3"/>
-            <APDUs Id="Coordinator->apduZCL" Name="apduZCL" Size="100" Instances="10"/>
         </PDUConfiguration>
         <ChannelMask Channel11="true" Channel12="false" Channel13="false" Channel14="false" Channel15="false" Channel16="false" Channel17="false" Channel18="false" Channel19="false" Channel20="false" Channel21="false" Channel22="false" Channel23="false" Channel24="false" Channel25="false" Channel26="false"/>
         <NodeDescriptor ManufacturerCode="4151" LogicalType="ZC" ComplexDescriptorAvailable="false" UserDescriptorAvailable="false" APSFlags="0" FrequencyBand="2.4GHz" AlternatePANCoordinator="true" DeviceType="true" PowerSource="true" RxOnWhenIdle="true" Security="false" AllocateAddress="true" MaximumBufferSize="127" MaximumIncomingTransferSize="100" MaximumOutgoingTransferSize="100" ExtendedActiveEndpointListAvailable="false" ExtendedSimpleDescriptorListAvailable="false" PrimaryTrustCenter="true" BackupTrustCenter="false" PrimaryBindingTableCache="false" BackupBindingTableCache="false" PrimaryDiscoveryCache="false" BackupDiscoveryCache="false" NetworkManager="true"/>
         <NodePowerDescriptor ConstantPower="true" RechargeableBattery="false" DisposableBattery="false" DefaultPowerSource="Constant Power" DefaultPowerMode="Synchronised with RxOnWhenIdle"/>
         <BindingTable Size="4"/>
-        <GroupTable Size="16"/>
         <KeyDescriptorTable Size="10"/>
         <MacInterfaceList>
             <MacInterface RouterAllowed="true" ChannelListSize="1" index="0" RadioType="RT2400MHz" Enabled="true"/>
@@ -323,7 +299,7 @@
             <EndDeviceBindServer OutputAPdu="Coordinator->apduZDP" Timeout="5" BindingTimeout="10" BindNumRetries="3"/>
         </ZDOServers>
     </Coordinator>
-    <ChildNodes xsi:type="zpscfg:Router" Name="LumiRouter" DiscoveryNeighbourTableSize="16" ActiveNeighbourTableSize="26" RouteDiscoveryTableSize="4" RoutingTableSize="70" BroadcastTransactionTableSize="25" RouteRecordTableSize="1" AddressMapTableSize="10" SecurityMaterialSets="2" MaxNumSimultaneousApsdeReq="5" MaxNumSimultaneousApsdeAckReq="3" MACMutexName="mutexMAC" ZPSMutexName="" FragmentationMaxNumSimulRx="0" FragmentationMaxNumSimulTx="0" DefaultEventMessageName="APP_vZpsEventHandler" MACDcfmIndMessage="zps_msgDcfmInd" MACTimeEventMessage="zps_msgTimeEvents" apsNonMemberRadius="2" apsDesignatedCoordinator="false" apsUseInsecureJoin="true" apsMaxWindowSize="8" apsInterframeDelay="10" APSDuplicateTableSize="3" apsSecurityTimeoutPeriod="6000" apsUseExtPANId="0x0000000000000000" SecurityEnabled="true" MACMlmeDcfmIndMessage="zps_msgMlmeDcfmInd" MACMcpsDcfmIndMessage="zps_msgMcpsDcfmInd" APSPersistenceTime="100" NumAPSMESimulCommands="4" StackProfile="2" InterPAN="false" GreenPowerSupport="false" NwkFcSaveCountBitShift="10" ApsFcSaveCountBitShift="10" MacTableSize="36" DefaultCallbackName="APP_vGenCallback" PermitJoiningTime="0" ChildTableSize="5" ScanDuration="3" NetworkSelection="User Selected">
+    <ChildNodes xsi:type="zpscfg:Router" Name="LumiRouter" DiscoveryNeighbourTableSize="16" ActiveNeighbourTableSize="26" RouteDiscoveryTableSize="4" RoutingTableSize="70" BroadcastTransactionTableSize="25" RouteRecordTableSize="1" AddressMapTableSize="10" SecurityMaterialSets="2" MaxNumSimultaneousApsdeReq="5" MaxNumSimultaneousApsdeAckReq="3" MACMutexName="mutexMAC" ZPSMutexName="" FragmentationMaxNumSimulRx="0" FragmentationMaxNumSimulTx="0" DefaultEventMessageName="APP_vZpsEventHandler" MACDcfmIndMessage="zps_msgDcfmInd" MACTimeEventMessage="zps_msgTimeEvents" apsNonMemberRadius="2" apsDesignatedCoordinator="false" apsUseInsecureJoin="true" apsMaxWindowSize="8" apsInterframeDelay="10" APSDuplicateTableSize="8" apsSecurityTimeoutPeriod="6000" apsUseExtPANId="0x0000000000000000" SecurityEnabled="true" MACMlmeDcfmIndMessage="zps_msgMlmeDcfmInd" MACMcpsDcfmIndMessage="zps_msgMcpsDcfmInd" APSPersistenceTime="100" NumAPSMESimulCommands="4" StackProfile="2" InterPAN="false" GreenPowerSupport="false" NwkFcSaveCountBitShift="10" ApsFcSaveCountBitShift="10" MacTableSize="36" DefaultCallbackName="APP_vGenCallback" PermitJoiningTime="0" ChildTableSize="5" ScanDuration="3" NetworkSelection="User Selected">
         <Endpoints Id="0" Enabled="true" ApplicationDeviceId="0" ApplicationDeviceVersion="0" Profile="ZDP" Message="" Name="ZDO">
             <InputClusters Cluster="NWK_addr_req" RxAPDU="LumiRouter->apduZDP" Discoverable="false"/>
             <InputClusters Cluster="IEEE_addr_req" RxAPDU="LumiRouter->apduZDP" Discoverable="false"/>
@@ -494,22 +470,21 @@
             <OutputClusters Cluster="Mgmt_NWK_Update_rsp" TxAPDUs="LumiRouter->apduZDP" Discoverable="false"/>
             <OutputClusters Cluster="Parent_Annce_rsp" TxAPDUs="LumiRouter->apduZDP" Discoverable="true"/>
         </Endpoints>
-        <Endpoints Id="1" Enabled="true" ApplicationDeviceId="0" ApplicationDeviceVersion="1" Profile="HA" Message="APP_ZCL_vEventHandler" Name="Application">
+        <Endpoints Id="1" Enabled="true" ApplicationDeviceId="0x0008" ApplicationDeviceVersion="0" Profile="HA" Message="APP_ZCL_vEventHandler" Name="Application">
             <InputClusters Cluster="Basic" RxAPDU="LumiRouter->apduZCL" Discoverable="true"/>
-            <InputClusters Cluster="DeviceTempCfg" RxAPDU="LumiRouter->apduZCL" Discoverable="true"/>
             <InputClusters Cluster="Default" RxAPDU="LumiRouter->apduZCL" Discoverable="false"/>
+            <InputClusters Cluster="DeviceTemperatureConfiguration" RxAPDU="LumiRouter->apduZCL" Discoverable="true"/>
             <OutputClusters Cluster="Basic" TxAPDUs="LumiRouter->apduZCL" Discoverable="false"/>
-            <OutputClusters Cluster="DeviceTempCfg" TxAPDUs="LumiRouter->apduZCL" Discoverable="false"/>
+            <OutputClusters Cluster="DeviceTemperatureConfiguration" TxAPDUs="LumiRouter->apduZCL" Discoverable="false"/>
         </Endpoints>
         <PDUConfiguration NumNPDUs="25" PDUMMutexName="mutexPDUM">
-            <APDUs Id="LumiRouter->apduZDP" Name="apduZDP" Size="100" Instances="3"/>
+            <APDUs Id="LumiRouter->apduZDP" Name="apduZDP" Size="100" Instances="9"/>
             <APDUs Id="LumiRouter->apduZCL" Name="apduZCL" Size="100" Instances="10"/>
         </PDUConfiguration>
         <ChannelMask Channel11="true" Channel12="true" Channel13="true" Channel14="true" Channel15="true" Channel16="true" Channel17="true" Channel18="true" Channel19="true" Channel20="true" Channel21="true" Channel22="true" Channel23="true" Channel24="true" Channel25="true" Channel26="true"/>
         <NodeDescriptor ManufacturerCode="4151" LogicalType="ZR" ComplexDescriptorAvailable="false" UserDescriptorAvailable="false" APSFlags="0" FrequencyBand="2.4GHz" AlternatePANCoordinator="false" DeviceType="true" PowerSource="true" RxOnWhenIdle="true" Security="false" AllocateAddress="true" MaximumBufferSize="127" MaximumIncomingTransferSize="100" MaximumOutgoingTransferSize="100" ExtendedActiveEndpointListAvailable="false" ExtendedSimpleDescriptorListAvailable="false" PrimaryTrustCenter="false" BackupTrustCenter="false" PrimaryBindingTableCache="false" BackupBindingTableCache="false" PrimaryDiscoveryCache="false" BackupDiscoveryCache="false" NetworkManager="false"/>
         <NodePowerDescriptor ConstantPower="true" RechargeableBattery="false" DisposableBattery="false" DefaultPowerSource="Constant Power" DefaultPowerMode="Synchronised with RxOnWhenIdle"/>
         <BindingTable Size="4"/>
-        <GroupTable Size="16"/>
         <KeyDescriptorTable Size="1"/>
         <MacInterfaceList>
             <MacInterface RouterAllowed="true" ChannelListSize="1" index="0" RadioType="RT2400MHz" Enabled="true"/>
