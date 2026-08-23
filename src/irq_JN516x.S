@@ -1,13 +1,12 @@
 ###########################################################################
-#  Module Name:        Low level interrupt handler for JN5169 FreeRTOS port
+#  Module Name:        PIC priority and software-vector tables for JN5169
 #
 #  Created By:         Ian Morris
 #
 #  Original Release:   January 21, 2010
 #
-#  Module Description: Handles interrupts required by FreeRTOS to switch
-#                      tasks, automatically using the tick timer or
-#                      manually using a system call.
+#  Module Description: Configures PIC source priorities and maps active
+#                      priority levels to MAC, UART0 and Tick Timer ISRs.
 #
 ###########################################################################
 
@@ -27,7 +26,7 @@ PIC_ChannelPriorities:
     .byte 0                 # uart1 priority
     .byte 0                 # timer0 priority
     .byte 0                 # spi slave priority
-    .byte 0                 # i2c maste/slave priority
+    .byte 0                 # i2c master/slave priority
     .byte 0                 # spi master priority
     .byte 0                 # pwm4 priority
     .byte 0                 # analog peripherals priority
