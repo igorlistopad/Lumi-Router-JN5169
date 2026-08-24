@@ -42,15 +42,12 @@ PDM_BUILD_TYPE    =_EEPROM
 STACK_SIZE        = 5000
 MINIMUM_HEAP_SIZE = 2000
 ZNCLKCMD = AppBuildZBPro.ld
-ENDIAN   = BIG_ENDIAN
 
 # Debug options
 DEBUG ?= NONE
 ifeq ($(DEBUG), UART1)
-	$(info Building with debug UART1 ...)
 	TRACE   = 1
 	CFLAGS += -DUART_DEBUGGING
-	CFLAGS += -DDBG_ENABLE
 	CFLAGS += -DDEBUG_BDB
 	CFLAGS += -DTRACE_APP=1
 	CFLAGS += -DTRACE_REPORT=1
@@ -66,7 +63,6 @@ DISABLE_LTO = 1
 
 # BDB features – Enable as required
 BDB_SUPPORT_NWK_STEERING ?= 1
-BDB_SUPPORT_FIND_AND_BIND_TARGET ?= 1
 
 # Generate build file name
 ifneq ($(SINGLE_CHANNEL), 0)
@@ -115,15 +111,11 @@ INCFLAGS += -I$(APP_SRC_DIR)/..
 
 # Application specific include files
 INCFLAGS += -I$(COMPONENTS_BASE_DIR)/ZCL/Include
-INCFLAGS += -I$(COMPONENTS_BASE_DIR)/ZCIF/Include
 INCFLAGS += -I$(COMPONENTS_BASE_DIR)/Xcv/Include/
 INCFLAGS += -I$(COMPONENTS_BASE_DIR)/Recal/Include/
-INCFLAGS += -I$(COMPONENTS_BASE_DIR)/MicroSpecific/Include
-INCFLAGS += -I$(COMPONENTS_BASE_DIR)/ZigbeeCommon/Include
-INCFLAGS += -I$(COMPONENTS_BASE_DIR)/HardwareAPI/Include
 
-# Optional stack features to pull relevant libraries into the build.
-OPTIONAL_STACK_FEATURES = $(shell $(ZPSCONFIG) -n $(TARGET) -f $(APP_SRC_DIR)/$(APP_ZPSCFG) -y )
+# Inter-PAN and Green Power are disabled in app.zpscfg.
+OPTIONAL_STACK_FEATURES := 0
 
 # Configure for the selected chip or chip family
 -include $(SDK_BASE_DIR)/Chip/Common/Build/config.mk
@@ -143,7 +135,6 @@ APPDEPS := $(addprefix $(APP_BLD_DIR)/,$(APPDEPS_TMP))
 # symbols are resolved correctly (i.e. ordering is significant for GCC)
 APPLDLIBS := $(foreach lib,$(APPLIBS),$(if $(wildcard $(addprefix $(COMPONENTS_BASE_DIR)/Library/lib,$(addsuffix _$(JENNIC_CHIP).a,$(lib)))),$(addsuffix _$(JENNIC_CHIP),$(lib)),$(addsuffix _$(JENNIC_CHIP_FAMILY),$(lib))))
 LDLIBS := $(APPLDLIBS) $(LDLIBS)
-LDLIBS += JPT_$(JENNIC_CHIP)
 
 # Path to directories containing application source 
 vpath % $(APP_SRC_DIR):$(ZCL_SRC_DIRS):$(BDB_SRC_DIR):$(UTIL_SRC_DIR):$(HW_SRC_DIR)
@@ -162,17 +153,17 @@ $(APP_SRC_DIR)/zps_gen.c $(APP_SRC_DIR)/zps_gen.h: $(APP_SRC_DIR)/$(APP_ZPSCFG) 
 
 $(APP_BLD_DIR)/%.o: %.S
 	$(info Assembling $< ...)
-	$(CC) -c -o $(subst src,build,$@) $(CFLAGS) $(INCFLAGS) $< -MD -MF $(APP_BLD_DIR)/$*.d -MP
+	$(CC) -c -o "$@" $(CFLAGS) $(INCFLAGS) "$<" -MD -MF "$(APP_BLD_DIR)/$*.d" -MP
 	@echo
 
 $(APP_BLD_DIR)/%.o: %.c 
 	$(info Compiling $< ...)
-	$(CC) -c -o $(subst src,build,$@) $(CFLAGS) $(INCFLAGS) $< -MD -MF $(APP_BLD_DIR)/$*.d -MP
+	$(CC) -c -o "$@" $(CFLAGS) $(INCFLAGS) "$<" -MD -MF "$(APP_BLD_DIR)/$*.d" -MP
 	@echo
 
 $(APP_BLD_DIR)/$(GENERATED_FILE_NAME).elf: $(APPOBJS) $(addsuffix.a,$(addprefix $(COMPONENTS_BASE_DIR)/Library/lib,$(APPLDLIBS))) 
 	$(info Linking $@ ...)
-	$(CC) -Wl,--gc-sections -Wl,-u_AppColdStart -Wl,-u_AppWarmStart $(LDFLAGS) -L $(SDK_BASE_DIR)/Stack/ZCL/Build/ -T$(ZNCLKCMD) -o $@ -Wl,--start-group $(APPOBJS) $(addprefix -l,$(LDLIBS)) -lm -Wl,--end-group -Wl,-Map,$(APP_BLD_DIR)/$(GENERATED_FILE_NAME).map 
+	$(CC) -Wl,-u_AppColdStart -Wl,-u_AppWarmStart $(LDFLAGS) -T$(ZNCLKCMD) -o $@ -Wl,--start-group $(APPOBJS) $(addprefix -l,$(LDLIBS)) -lm -Wl,--end-group -Wl,-Map,$(APP_BLD_DIR)/$(GENERATED_FILE_NAME).map 
 	$(SIZE) $@
 
 $(APP_BLD_DIR)/$(GENERATED_FILE_NAME).bin: $(APP_BLD_DIR)/$(GENERATED_FILE_NAME).elf
@@ -240,6 +231,8 @@ ifneq ($(shell uname -s), Linux)
 	$(error Unsupported operating system)
 endif
 
+-include $(APPDEPS)
+
+.NOTPARALLEL:
 .PHONY: all clean install pre-build pre-install install-sdk install-toolchain main-build
-.SECONDARY: main-build
 .DELETE_ON_ERROR:
