@@ -122,6 +122,9 @@ OPTIONAL_STACK_FEATURES := 0
 -include $(SDK_BASE_DIR)/Stack/Common/Build/config.mk
 -include $(SDK_BASE_DIR)/Components/BDB/Build/config.mk
 
+# LumiRouter does not use SDK Generic devices.
+GENERIC_SRCS :=
+
 TEMP = $(APPSRC:.c=.o)
 APPOBJS_TMP = $(TEMP:.S=.o)
 APPOBJS := $(addprefix $(APP_BLD_DIR)/,$(APPOBJS_TMP))
