@@ -24,6 +24,8 @@
 #define TRACE_REPORT FALSE
 #endif
 
+#define APP_REPORT_INDEX_INVALID 0xFF
+
 #define DEVICE_TEMPERATURE_MINIMUM_REPORTABLE_CHANGE       0x01
 #define DEVICE_TEMPERATURE_MIN_REPORT_INTERVAL_SECONDS     300
 #define DEVICE_TEMPERATURE_MAX_REPORT_INTERVAL_SECONDS     3600
@@ -37,10 +39,10 @@ PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
 PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport);
 
 /* One report: Device Temperature Configuration */
-PRIVATE APP_tsReports asSavedReports[ZCL_NUMBER_OF_REPORTS];
+PRIVATE APP_tsReports asSavedReports[NUMBER_OF_REPORTS];
 
 /* Define the default reports */
-PRIVATE const APP_tsReports asDefaultReports[ZCL_NUMBER_OF_REPORTS] = {
+PRIVATE APP_tsReports asDefaultReports[NUMBER_OF_REPORTS] = {
     {
         GENERAL_CLUSTER_ID_DEVICE_TEMPERATURE_CONFIGURATION,
         {
@@ -82,7 +84,7 @@ PUBLIC void APP_vMakeSupportedAttributesReportable(void)
 
     DBG_vPrintf(TRACE_REPORT, "Make reportable ep %d\n", LUMIROUTER_APPLICATION_ENDPOINT);
 
-    for (i = 0; i < ZCL_NUMBER_OF_REPORTS; i++) {
+    for (i = 0; i < NUMBER_OF_REPORTS; i++) {
         u16AttributeEnum = asSavedReports[i].sAttributeReportingConfigurationRecord.u16AttributeEnum;
         u16ClusterId = asSavedReports[i].u16ClusterID;
         psAttributeReportingConfigurationRecord = &(asSavedReports[i].sAttributeReportingConfigurationRecord);
@@ -107,7 +109,7 @@ PUBLIC void APP_vLoadDefaultConfigForReportable(void)
 
     memset(asSavedReports, 0, sizeof(asSavedReports));
 
-    for (i = 0; i < ZCL_NUMBER_OF_REPORTS; i++) {
+    for (i = 0; i < NUMBER_OF_REPORTS; i++) {
         asSavedReports[i] = asDefaultReports[i];
         APP_vPrintReportRecord(&asSavedReports[i]);
     }
@@ -125,7 +127,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
 {
     uint8 u8Index = APP_u8GetRecordIndex(u16ClusterID, psAttributeReportingConfigurationRecord->u16AttributeEnum);
 
-    if (u8Index == 0xFF) {
+    if (u8Index == APP_REPORT_INDEX_INVALID) {
         return;
     }
 
@@ -153,7 +155,7 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
 {
     uint8 u8Index = APP_u8GetRecordIndex(u16ClusterID, psAttributeReportingConfigurationRecord->u16AttributeEnum);
 
-    if (u8Index == 0xFF) {
+    if (u8Index == APP_REPORT_INDEX_INVALID) {
         return;
     }
 
@@ -180,14 +182,12 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
  */
 PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
 {
-    uint8 u8Index = 0xFF;
-
     if ((u16ClusterID == GENERAL_CLUSTER_ID_DEVICE_TEMPERATURE_CONFIGURATION) &&
         (u16AttributeEnum == E_CLD_DEVTEMPCFG_ATTR_ID_CURRENT_TEMPERATURE)) {
-        u8Index = REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT;
+        return REPORT_DEVICE_TEMPERATURE_CONFIGURATION_SLOT;
     }
 
-    return u8Index;
+    return APP_REPORT_INDEX_INVALID;
 }
 
 /**
@@ -195,16 +195,14 @@ PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
  */
 PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport)
 {
-    tsZCL_AttributeReportingConfigurationRecord *psRec = &psReport->sAttributeReportingConfigurationRecord;
-
     DBG_vPrintf(TRACE_REPORT,
                 "Cluster %04x Type %d Attr %04x Min %d Max %d IntV %d Direct %d Change %d\n",
                 psReport->u16ClusterID,
-                psRec->eAttributeDataType,
-                psRec->u16AttributeEnum,
-                psRec->u16MinimumReportingInterval,
-                psRec->u16MaximumReportingInterval,
-                psRec->u16TimeoutPeriodField,
-                psRec->u8DirectionIsReceived,
-                psRec->uAttributeReportableChange.zint16ReportableChange);
+                psReport->sAttributeReportingConfigurationRecord.eAttributeDataType,
+                psReport->sAttributeReportingConfigurationRecord.u16AttributeEnum,
+                psReport->sAttributeReportingConfigurationRecord.u16MinimumReportingInterval,
+                psReport->sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
+                psReport->sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
+                psReport->sAttributeReportingConfigurationRecord.u8DirectionIsReceived,
+                psReport->sAttributeReportingConfigurationRecord.uAttributeReportableChange.zint16ReportableChange);
 }
