@@ -19,11 +19,8 @@
 #include "bdb_api.h"
 #include "mac_vs_sap.h"
 #include "portmacro.h"
+#include "pwrm.h"
 #include "zps_apl_af.h"
-
-#ifndef TRACE_APP
-#define TRACE_APP FALSE
-#endif
 
 #define APP_ZTIMER_STORAGE   3
 #define BDB_QUEUE_SIZE       3
@@ -51,7 +48,6 @@ PRIVATE uint8 au8TxBuffer[TX_QUEUE_SIZE];
 PRIVATE uint8 au8RxBuffer[RX_QUEUE_SIZE];
 
 extern void zps_taskZPS(void);
-extern void PWRM_vManagePower(void);
 
 /**
  * @brief Main application loop
@@ -66,16 +62,14 @@ PUBLIC void APP_vMainLoop(void)
         /* Processes BDB event queue */
         bdb_taskBDB();
 
-        /* Ticks software timers */
+        /* Dispatches expired software-timer callbacks */
         ZTIMER_vTask();
 
         /* Processes serial Rx message queue */
         APP_taskAtSerial();
 
-        /* Re-load the watch-dog timer. Execution must return through the idle
-         * task before the CPU is suspended by the power manager. This ensures
-         * that at least one task / ISR has executed within the watchdog period
-         * otherwise the system will be reset. */
+        /* Reload the watchdog after one complete pass of cooperative processing.
+         * If this loop stops making progress, the watchdog resets the device. */
         vAHI_WatchdogRestart();
 
         /* Suspends CPU operation when the system is idle or puts the device to
