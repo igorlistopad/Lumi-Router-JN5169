@@ -11,6 +11,10 @@ else
 	CFLAGS += -DBUILD_DATE_STRING=\"$(BUILD_DATE)\"
 endif
 
+# Application version
+VERSION_STRING ?= 2026.9.0b
+CFLAGS         += -DVERSION_STRING=\"$(VERSION_STRING)\"
+
 # Network settings
 # Channel (0 for default channels)
 SINGLE_CHANNEL ?= 0
