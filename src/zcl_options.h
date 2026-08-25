@@ -32,8 +32,6 @@ enum {
 };
 
 #define ZCL_NUMBER_OF_REPORTS NUMBER_OF_REPORTS
-#define MIN_REPORT_INTERVAL   300
-#define MAX_REPORT_INTERVAL   3600
 
 /* Enable wild card profile */
 #define ZCL_ALLOW_WILD_CARD_PROFILE
