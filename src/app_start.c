@@ -28,7 +28,11 @@
 #endif
 
 PRIVATE void APP_vInitialise(void);
+#if TRACE_APP
 PRIVATE void APP_vExtendedStatusCallback(ZPS_teExtendedStatus eExtendedStatus);
+#endif
+
+extern void *_stack_low_water_mark;
 
 /**
  * @brief Entry point for application from a cold start.
@@ -36,19 +40,17 @@ PRIVATE void APP_vExtendedStatusCallback(ZPS_teExtendedStatus eExtendedStatus);
  */
 PUBLIC void vAppMain(void)
 {
-    /* Wait until FALSE i.e. on XTAL - otherwise UART data will be at wrong speed */
-    while (bAHI_GetClkSource() == TRUE)
-        ;
-
-    /* Move CPU to 32 MHz; vAHI_OptimiseWaitStates automatically called */
-    bAHI_SetClockRate(E_AHI_XTAL_32MHZ);
-
 #ifdef UART_DEBUGGING
     /* Initialise the debug diagnostics module to use UART1 at 115K Baud */
     DBG_vUartInit(DBG_E_UART_1, DBG_E_UART_BAUD_RATE_115200);
 #endif
 
     DBG_vPrintf(TRACE_APP, "*** Initializing Lumi Router ***\n");
+
+    /* Initialise the stack overflow exception to trigger if the end of the
+     * stack is reached. See the linker command file to adjust the allocated
+     * stack size. */
+    vAHI_SetStackOverflow(TRUE, (uint32)&_stack_low_water_mark);
 
 #ifdef ENABLING_HIGH_POWER_MODE
     /* After testing on Xiaomi DGNWG05LM and Aqara ZHWG11LM devices, it was
@@ -93,6 +95,9 @@ PUBLIC void vAppRegisterPWRMCallbacks(void)
  */
 PRIVATE void APP_vInitialise(void)
 {
+    /* Initialise Protocol Data Unit Manager */
+    PDUM_vInit();
+
     /* Initialise Power Manager even on non-sleeping nodes as it allows the
      * device to doze when in the idle task */
     PWRM_vInit(E_AHI_SLEEP_OSCON_RAMON);
@@ -101,19 +106,19 @@ PRIVATE void APP_vInitialise(void)
      * If this parameter is set to zero, the application is given access to the full EEPROM. */
     PDM_eInitialise(0);
 
-    /* Initialise Protocol Data Unit Manager */
-    PDUM_vInit();
-
     /* Initialise the UART peripheral */
     UART_vInit();
 
+#if TRACE_APP
     /* Register a callback function for extended error handling */
     ZPS_vExtendedStatusSetCallback(APP_vExtendedStatusCallback);
+#endif
 
     /* Initialise application */
     APP_vInitialiseRouter();
 }
 
+#if TRACE_APP
 /**
  * @brief Callback from stack on extended error situations.
  */
@@ -121,3 +126,4 @@ PRIVATE void APP_vExtendedStatusCallback(ZPS_teExtendedStatus eExtendedStatus)
 {
     DBG_vPrintf(TRACE_APP, "ERROR: Extended status 0x%02x\n", eExtendedStatus);
 }
+#endif
