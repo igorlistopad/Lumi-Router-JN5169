@@ -474,8 +474,6 @@
             <InputClusters Cluster="Basic" RxAPDU="LumiRouter->apduZCL" Discoverable="true"/>
             <InputClusters Cluster="Default" RxAPDU="LumiRouter->apduZCL" Discoverable="false"/>
             <InputClusters Cluster="DeviceTemperatureConfiguration" RxAPDU="LumiRouter->apduZCL" Discoverable="true"/>
-            <OutputClusters Cluster="Basic" TxAPDUs="LumiRouter->apduZCL" Discoverable="false"/>
-            <OutputClusters Cluster="DeviceTemperatureConfiguration" TxAPDUs="LumiRouter->apduZCL" Discoverable="false"/>
         </Endpoints>
         <PDUConfiguration NumNPDUs="25" PDUMMutexName="mutexPDUM">
             <APDUs Id="LumiRouter->apduZDP" Name="apduZDP" Size="100" Instances="9"/>
