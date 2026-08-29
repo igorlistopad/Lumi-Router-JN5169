@@ -32,13 +32,14 @@
 PRIVATE void APP_ZCL_vTick(void);
 PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent);
 PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent);
+PRIVATE void APP_ZCL_vHandleConfigureReportingRecord(tsZCL_CallBackEvent *psEvent);
 PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCallBack, APP_tsLumiRouter *psDeviceInfo);
 PRIVATE void APP_ZCL_vDeviceSpecific_Init(void);
 
 PUBLIC APP_tsLumiRouter sLumiRouter;
 
 /**
- * @brief Initialises ZCL related functions
+ * @brief Initialises ZCL, registers the application endpoint, and starts the tick timer
  */
 PUBLIC void APP_ZCL_vInitialise(void)
 {
@@ -47,7 +48,7 @@ PUBLIC void APP_ZCL_vInitialise(void)
     /* Initialise ZCL */
     eZCL_Status = eZCL_Initialise(&APP_ZCL_cbGeneralCallback, apduZCL);
     if (eZCL_Status != E_ZCL_SUCCESS) {
-        DBG_vPrintf(TRACE_ZCL, "Error: eZCL_Initialise failed: %d\n", eZCL_Status);
+        DBG_vPrintf(TRACE_ZCL, "ZCL Initialisation: Error status=%x\n", eZCL_Status);
     }
 
     /* Start the tick timer */
@@ -56,40 +57,39 @@ PUBLIC void APP_ZCL_vInitialise(void)
     /* Register Router EndPoint */
     eZCL_Status = APP_ZCL_eRegisterEndPoint(&APP_ZCL_cbEndpointCallback, &sLumiRouter);
     if (eZCL_Status != E_ZCL_SUCCESS) {
-        DBG_vPrintf(TRACE_ZCL, "Error: APP_ZCL_eRegisterEndPoint: %02x\n", eZCL_Status);
+        DBG_vPrintf(TRACE_ZCL, "ZCL Endpoint Registration: Error status=%x\n", eZCL_Status);
     }
 
     APP_ZCL_vDeviceSpecific_Init();
 }
 
 /**
- * @brief Process ZCL events from the stack
+ * @brief Dispatches a Zigbee stack event to ZCL
  */
 PUBLIC void APP_ZCL_vEventHandler(ZPS_tsAfEvent *psStackEvent)
 {
     tsZCL_CallBackEvent sCallBackEvent;
     sCallBackEvent.pZPSevent = psStackEvent;
 
-    DBG_vPrintf(TRACE_ZCL, "ZCL_Task endpoint event: %d\n", psStackEvent->eType);
+    DBG_vPrintf(TRACE_ZCL, "ZCL Stack Event: type=%d\n", psStackEvent->eType);
     sCallBackEvent.eEventType = E_ZCL_CBET_ZIGBEE_EVENT;
     vZCL_EventHandler(&sCallBackEvent);
 }
 
 /**
- * @brief Callback for ZCL Tick timer
+ * @brief Handles expiration of the ZCL tick timer
  */
 PUBLIC void APP_cbTimerZclTick(void *pvParam)
 {
-    /*
-     * If the 1 second tick timer has expired, restart it and pass
-     * the event on to ZCL
-     */
+    (void)pvParam;
+
+    /* Notify ZCL of the one-second tick, then re-arm the application timer. */
     APP_ZCL_vTick();
     ZTIMER_eStart(u8TimerTick, ZCL_TICK_TIME);
 }
 
 /**
- * @brief Generate a ZCL timer tick event
+ * @brief Dispatches a timer tick event to ZCL
  */
 PRIVATE void APP_ZCL_vTick(void)
 {
@@ -106,48 +106,16 @@ PRIVATE void APP_ZCL_vTick(void)
 PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent)
 {
     switch (psEvent->eEventType) {
-    case E_ZCL_CBET_LOCK_MUTEX:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Lock Mutex\n");
-        break;
-
-    case E_ZCL_CBET_UNLOCK_MUTEX:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Unlock Mutex\n");
+    case E_ZCL_CBET_ERROR:
+        DBG_vPrintf(TRACE_ZCL, "ZCL General Callback: Error status=%x\n", psEvent->eZCL_Status);
         break;
 
     case E_ZCL_CBET_UNHANDLED_EVENT:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Unhandled Event\n");
-        break;
-
-    case E_ZCL_CBET_READ_ATTRIBUTES_RESPONSE:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Read attributes response\n");
-        break;
-
-    case E_ZCL_CBET_READ_REQUEST:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Read request\n");
-        break;
-
-    case E_ZCL_CBET_DEFAULT_RESPONSE:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Default response\n");
-        break;
-
-    case E_ZCL_CBET_ERROR:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Error\n");
-        break;
-
-    case E_ZCL_CBET_TIMER:
-        DBG_vPrintf(TRACE_ZCL, "EVT: Timer\n");
-        break;
-
-    case E_ZCL_CBET_ZIGBEE_EVENT:
-        DBG_vPrintf(TRACE_ZCL, "EVT: ZigBee\n");
-        break;
-
-    case E_ZCL_CBET_CLUSTER_CUSTOM:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Custom\n");
+        DBG_vPrintf(TRACE_ZCL, "ZCL General Callback: Unhandled event\n");
         break;
 
     default:
-        DBG_vPrintf(TRACE_ZCL, "Invalid event type\n");
+        DBG_vPrintf(TRACE_ZCL, "ZCL General Callback: Unexpected event type=%d\n", psEvent->eEventType);
         break;
     }
 }
@@ -158,109 +126,94 @@ PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent)
 PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
 {
     switch (psEvent->eEventType) {
-    case E_ZCL_CBET_LOCK_MUTEX:
-        break;
-
-    case E_ZCL_CBET_UNLOCK_MUTEX:
-        break;
-
-    case E_ZCL_CBET_UNHANDLED_EVENT:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Unhandled event\n");
-        break;
-
-    case E_ZCL_CBET_READ_INDIVIDUAL_ATTRIBUTE_RESPONSE:
-        DBG_vPrintf(TRACE_ZCL,
-                    "EP EVT: Rd Attr Rsp %04x AS %d\n",
-                    psEvent->uMessage.sIndividualAttributeResponse.u16AttributeEnum,
-                    psEvent->uMessage.sIndividualAttributeResponse.eAttributeStatus);
-        break;
-
-    case E_ZCL_CBET_READ_ATTRIBUTES_RESPONSE:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Read attributes response\n");
-        break;
-
     case E_ZCL_CBET_READ_REQUEST:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Read request\n");
+        /* Use the current attribute values; do not refresh them before the read. */
         break;
 
     case E_ZCL_CBET_DEFAULT_RESPONSE:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Default response\n");
-        break;
-
-    case E_ZCL_CBET_ERROR:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Error\n");
-        break;
-
-    case E_ZCL_CBET_TIMER:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Timer\n");
-        break;
-
-    case E_ZCL_CBET_ZIGBEE_EVENT:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: ZigBee\n");
-        break;
-
-    case E_ZCL_CBET_CLUSTER_CUSTOM:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Custom cluster %04x\n", psEvent->uMessage.sClusterCustomMessage.u16ClusterId);
-        break;
-
-    case E_ZCL_CBET_WRITE_INDIVIDUAL_ATTRIBUTE:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Write Individual Attribute Status %02x\n", psEvent->eZCL_Status);
-        break;
-
-    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTE: {
-        tsZCL_IndividualAttributesResponse *psIndividualAttributeResponse =
-            &psEvent->uMessage.sIndividualAttributeResponse;
         DBG_vPrintf(TRACE_ZCL,
-                    "Individual Report attribute for Cluster = %d\n",
+                    "ZCL Endpoint Callback: Default response command=%02x status=%02x\n",
+                    psEvent->uMessage.sDefaultResponse.u8CommandId,
+                    psEvent->uMessage.sDefaultResponse.u8StatusCode);
+        break;
+
+    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTES_CONFIGURE:
+        APP_ZCL_vHandleConfigureReportingRecord(psEvent);
+        break;
+
+    case E_ZCL_CBET_REPORT_ATTRIBUTES_CONFIGURE:
+        DBG_vPrintf(TRACE_ZCL,
+                    "ZCL Endpoint Callback: Configure reporting complete cluster=%04x\n",
                     psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum);
-        DBG_vPrintf(TRACE_ZCL, "eAttributeDataType = %d\n", psIndividualAttributeResponse->eAttributeDataType);
-        DBG_vPrintf(TRACE_ZCL, "u16AttributeEnum = %d\n", psIndividualAttributeResponse->u16AttributeEnum);
-        DBG_vPrintf(TRACE_ZCL, "eAttributeStatus = %d\n", psIndividualAttributeResponse->eAttributeStatus);
-    } break;
-
-    case E_ZCL_CBET_REPORT_INDIVIDUAL_ATTRIBUTES_CONFIGURE: {
-        tsZCL_AttributeReportingConfigurationRecord *psAttributeReportingRecord =
-            &psEvent->uMessage.sAttributeReportingConfigurationRecord;
-        DBG_vPrintf(
-            TRACE_ZCL,
-            "Individual Configure Report Cluster %d Attrib %d Type %d Min %d Max %d IntV %d Direct %d Change %d\n",
-            psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum,
-            psAttributeReportingRecord->u16AttributeEnum,
-            psAttributeReportingRecord->eAttributeDataType,
-            psAttributeReportingRecord->u16MinimumReportingInterval,
-            psAttributeReportingRecord->u16MaximumReportingInterval,
-            psAttributeReportingRecord->u16TimeoutPeriodField,
-            psAttributeReportingRecord->u8DirectionIsReceived,
-            psAttributeReportingRecord->uAttributeReportableChange);
-        if (E_ZCL_SUCCESS == psEvent->eZCL_Status) {
-            APP_vSaveReportableRecord(psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum,
-                                      psAttributeReportingRecord);
-        }
-        else if (E_ZCL_RESTORE_DEFAULT_REPORT_CONFIGURATION == psEvent->eZCL_Status) {
-            APP_vRestoreDefaultRecord(LUMIROUTER_APPLICATION_ENDPOINT,
-                                      psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum,
-                                      psAttributeReportingRecord);
-        }
-    } break;
-
-    case E_ZCL_CBET_CLUSTER_UPDATE:
-        DBG_vPrintf(TRACE_ZCL, "Update Id %04x\n", psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum);
         break;
 
     case E_ZCL_CBET_REPORT_REQUEST:
+        /* Use the current attribute values; do not refresh them before reporting. */
+        break;
+
+    case E_ZCL_CBET_ERROR:
+        DBG_vPrintf(TRACE_ZCL,
+                    "ZCL Endpoint Callback: Error status=%x endpoint=%d\n",
+                    psEvent->eZCL_Status,
+                    psEvent->u8EndPoint);
+        break;
+
+    case E_ZCL_CBET_UNHANDLED_EVENT:
+        DBG_vPrintf(TRACE_ZCL, "ZCL Endpoint Callback: Unhandled event\n");
         break;
 
     default:
-        DBG_vPrintf(TRACE_ZCL, "EP EVT: Invalid evt type 0x%x\n", (uint8)psEvent->eEventType);
+        DBG_vPrintf(TRACE_ZCL, "ZCL Endpoint Callback: Unexpected event type=%d\n", psEvent->eEventType);
         break;
     }
 }
 
 /**
- * @brief Register application endpoint with ZCL
+ * @brief Handles a Configure Reporting record
+ */
+PRIVATE void APP_ZCL_vHandleConfigureReportingRecord(tsZCL_CallBackEvent *psEvent)
+{
+    tsZCL_AttributeReportingConfigurationRecord *psRecord = &psEvent->uMessage.sAttributeReportingConfigurationRecord;
+    uint16 u16ClusterId = psEvent->psClusterInstance->psClusterDefinition->u16ClusterEnum;
+
+    if (psEvent->eZCL_Status == E_ZCL_SUCCESS) {
+        DBG_vPrintf(TRACE_ZCL,
+                    "ZCL Endpoint Callback: Configure reporting "
+                    "cluster=%04x attribute=%04x type=%d min=%d max=%d\n",
+                    u16ClusterId,
+                    psRecord->u16AttributeEnum,
+                    psRecord->eAttributeDataType,
+                    psRecord->u16MinimumReportingInterval,
+                    psRecord->u16MaximumReportingInterval);
+
+        APP_vSaveReportableRecord(u16ClusterId, psRecord);
+    }
+    else if (psEvent->eZCL_Status == E_ZCL_RESTORE_DEFAULT_REPORT_CONFIGURATION) {
+        DBG_vPrintf(TRACE_ZCL,
+                    "ZCL Endpoint Callback: Configure reporting restore default "
+                    "cluster=%04x attribute=%04x\n",
+                    u16ClusterId,
+                    psRecord->u16AttributeEnum);
+
+        APP_vRestoreDefaultRecord(LUMIROUTER_APPLICATION_ENDPOINT, u16ClusterId, psRecord);
+    }
+    else {
+        /* An empty request may leave the reporting record uninitialized. */
+        DBG_vPrintf(TRACE_ZCL,
+                    "ZCL Endpoint Callback: Configure reporting failed "
+                    "cluster=%04x status=%x\n",
+                    u16ClusterId,
+                    psEvent->eZCL_Status);
+    }
+}
+
+/**
+ * @brief Creates cluster instances and registers the application endpoint with ZCL
  */
 PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCallBack, APP_tsLumiRouter *psDeviceInfo)
 {
+    teZCL_Status eZCL_Status;
+
     /* Fill in end point details */
     psDeviceInfo->sEndPoint.u8EndPointNumber = LUMIROUTER_APPLICATION_ENDPOINT;
     psDeviceInfo->sEndPoint.u16ManufacturerCode = ZCL_MANUFACTURER_CODE;
@@ -272,21 +225,23 @@ PRIVATE teZCL_Status APP_ZCL_eRegisterEndPoint(tfpZCL_ZCLCallBackFunction cbCall
     psDeviceInfo->sEndPoint.bDisableDefaultResponse = ZCL_DISABLE_DEFAULT_RESPONSES;
     psDeviceInfo->sEndPoint.pCallBackFunctions = cbCallBack;
 
-    if (eCLD_BasicCreateBasic(&psDeviceInfo->sClusterInstance.sBasicServer,
-                              TRUE,
-                              &sCLD_Basic,
-                              &psDeviceInfo->sBasicServerCluster,
-                              &au8BasicClusterAttributeControlBits[0]) != E_ZCL_SUCCESS) {
-        return E_ZCL_FAIL;
+    eZCL_Status = eCLD_BasicCreateBasic(&psDeviceInfo->sClusterInstance.sBasicServer,
+                                        TRUE,
+                                        &sCLD_Basic,
+                                        &psDeviceInfo->sBasicServerCluster,
+                                        &au8BasicClusterAttributeControlBits[0]);
+    if (eZCL_Status != E_ZCL_SUCCESS) {
+        return eZCL_Status;
     }
 
-    if (eCLD_DeviceTemperatureConfigurationCreateDeviceTemperatureConfiguration(
-            &psDeviceInfo->sClusterInstance.sDeviceTemperatureConfigurationServer,
-            TRUE,
-            &sCLD_DeviceTemperatureConfiguration,
-            &psDeviceInfo->sDeviceTemperatureConfigurationServerCluster,
-            &au8DeviceTempConfigClusterAttributeControlBits[0]) != E_ZCL_SUCCESS) {
-        return E_ZCL_FAIL;
+    eZCL_Status = eCLD_DeviceTemperatureConfigurationCreateDeviceTemperatureConfiguration(
+        &psDeviceInfo->sClusterInstance.sDeviceTemperatureConfigurationServer,
+        TRUE,
+        &sCLD_DeviceTemperatureConfiguration,
+        &psDeviceInfo->sDeviceTemperatureConfigurationServerCluster,
+        &au8DeviceTempConfigClusterAttributeControlBits[0]);
+    if (eZCL_Status != E_ZCL_SUCCESS) {
+        return eZCL_Status;
     }
 
     return eZCL_Register(&psDeviceInfo->sEndPoint);
@@ -301,6 +256,4 @@ PRIVATE void APP_ZCL_vDeviceSpecific_Init(void)
     memcpy(sLumiRouter.sBasicServerCluster.au8ModelIdentifier, BAS_MODEL_ID_STRING, CLD_BAS_MODEL_ID_SIZE);
     memcpy(sLumiRouter.sBasicServerCluster.au8DateCode, BAS_DATE_STRING, CLD_BAS_DATE_SIZE);
     memcpy(sLumiRouter.sBasicServerCluster.au8SWBuildID, BAS_SW_BUILD_STRING, CLD_BAS_SW_BUILD_SIZE);
-
-    sLumiRouter.sDeviceTemperatureConfigurationServerCluster.i16CurrentTemperature = 0;
 }
