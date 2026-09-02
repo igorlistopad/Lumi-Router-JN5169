@@ -58,7 +58,7 @@ PUBLIC void APP_taskAtSerial(void)
  */
 PUBLIC void APP_WriteMessageToSerial(const char *message)
 {
-    DBG_vPrintf(TRACE_SERIAL, "APP_WriteMessageToSerial(%s)\n", message);
+    DBG_vPrintf(TRACE_SERIAL, "Serial: TX message=\"%s\"\n", message);
 
     for (; *message != '\0'; message++) {
         APP_vWriteTxChar((uint8)*message);
@@ -135,6 +135,8 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
  */
 PRIVATE void APP_vProcessCommand(uint8 u8Command)
 {
+    DBG_vPrintf(TRACE_SERIAL, "Serial: RX command=%02x\n", u8Command);
+
     switch (u8Command) {
     case E_SC_MSG_RESET:
         APP_WriteMessageToSerial("Reset...........");
@@ -159,6 +161,8 @@ PRIVATE void APP_vProcessCommand(uint8 u8Command)
  */
 PRIVATE void APP_vWriteTxChar(uint8 u8Char)
 {
+    bool_t bByteDropped = FALSE;
+
     ZPS_eEnterCriticalSection(NULL, &u32CriticalSectionStorage);
 
     if (UART_bTxReady() && ZQ_bQueueIsEmpty(&APP_msgSerialTx)) {
@@ -168,9 +172,13 @@ PRIVATE void APP_vWriteTxChar(uint8 u8Char)
     }
     else {
         if (!ZQ_bQueueSend(&APP_msgSerialTx, &u8Char)) {
-            DBG_vPrintf(TRACE_SERIAL, "TX queue overflow\n");
+            bByteDropped = TRUE;
         }
     }
 
     ZPS_eExitCriticalSection(NULL, &u32CriticalSectionStorage);
+
+    if (bByteDropped) {
+        DBG_vPrintf(TRACE_SERIAL, "Serial: TX queue full, byte dropped\n");
+    }
 }

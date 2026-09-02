@@ -41,7 +41,7 @@ PUBLIC void APP_vDeviceTemperatureInit(void)
     while (!bAHI_APRegulatorEnabled())
         ;
 
-    DBG_vPrintf(TRACE_DEVICE_TEMPERATURE, "APP: Init Device Temperature\n");
+    DBG_vPrintf(TRACE_DEVICE_TEMPERATURE, "Device Temperature: Initialised\n");
 
     /* Perform the first temperature reading immediately so that
      * the ZCL attribute i16CurrentTemperature is valid from
@@ -70,7 +70,7 @@ PRIVATE void APP_vDeviceTemperatureUpdate(void)
 {
     int16 i16DeviceTemperature = APP_i16GetDeviceTemperature();
 
-    DBG_vPrintf(TRACE_DEVICE_TEMPERATURE, "APP: Temp = %d C\n", i16DeviceTemperature);
+    DBG_vPrintf(TRACE_DEVICE_TEMPERATURE, "Device Temperature: Value=%d C\n", i16DeviceTemperature);
 
     sLumiRouter.sDeviceTemperatureConfigurationServerCluster.i16CurrentTemperature = i16DeviceTemperature;
 }

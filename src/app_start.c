@@ -45,7 +45,7 @@ PUBLIC void vAppMain(void)
     DBG_vUartInit(DBG_E_UART_1, DBG_E_UART_BAUD_RATE_115200);
 #endif
 
-    DBG_vPrintf(TRACE_APP, "*** Initializing Lumi Router ***\n");
+    DBG_vPrintf(TRACE_APP, "*** Initialising Lumi Router ***\n");
 
     /* Initialise the stack overflow exception to trigger if the end of the
      * stack is reached. See the linker command file to adjust the allocated
@@ -64,19 +64,19 @@ PUBLIC void vAppMain(void)
     vAppApiSetHighPowerMode(APP_API_MODULE_HPM05, TRUE);
 #endif
 
-    DBG_vPrintf(TRACE_APP, "APP: Entering APP_vSetUpHardware()\n");
+    DBG_vPrintf(TRACE_APP, "APP: Initialising hardware\n");
     APP_vSetUpHardware();
 
-    DBG_vPrintf(TRACE_APP, "APP: Entering APP_vInitResources()\n");
+    DBG_vPrintf(TRACE_APP, "APP: Initialising resources\n");
     APP_vInitResources();
 
-    DBG_vPrintf(TRACE_APP, "APP: Entering APP_vInitialise()\n");
+    DBG_vPrintf(TRACE_APP, "APP: Initialising application\n");
     APP_vInitialise();
 
-    DBG_vPrintf(TRACE_APP, "APP: Entering BDB_vStart()\n");
+    DBG_vPrintf(TRACE_APP, "APP: Starting BDB\n");
     BDB_vStart();
 
-    DBG_vPrintf(TRACE_APP, "APP: Entering APP_vMainLoop()\n");
+    DBG_vPrintf(TRACE_APP, "APP: Entering main loop\n");
     APP_vMainLoop();
 }
 
@@ -124,6 +124,6 @@ PRIVATE void APP_vInitialise(void)
  */
 PRIVATE void APP_vExtendedStatusCallback(ZPS_teExtendedStatus eExtendedStatus)
 {
-    DBG_vPrintf(TRACE_APP, "ERROR: Extended status 0x%02x\n", eExtendedStatus);
+    DBG_vPrintf(TRACE_APP, "ZPS: Extended error status=%02x\n", eExtendedStatus);
 }
 #endif

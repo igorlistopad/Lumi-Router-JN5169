@@ -30,11 +30,12 @@ PRIVATE uint8 au8UartHwRxFifo[MAX_RX_BUFFER];
  */
 PUBLIC void UART_vInit(void)
 {
-    DBG_vPrintf(TRACE_UART, "Initialising UART... ");
-
     vAHI_UartSetRTSCTS(UART, FALSE);
 
-    bAHI_UartEnable(UART, au8UartHwTxFifo, MAX_TX_BUFFER, au8UartHwRxFifo, MAX_RX_BUFFER);
+    if (!bAHI_UartEnable(UART, au8UartHwTxFifo, MAX_TX_BUFFER, au8UartHwRxFifo, MAX_RX_BUFFER)) {
+        DBG_vPrintf(TRACE_UART, "UART: Initialisation failed\n");
+        return;
+    }
 
     vAHI_UartReset(UART, TRUE, TRUE);
     vAHI_UartReset(UART, FALSE, FALSE);
@@ -43,6 +44,8 @@ PUBLIC void UART_vInit(void)
 
     vAHI_UartSetControl(UART, FALSE, FALSE, E_AHI_UART_WORD_LEN_8, TRUE, FALSE);
     vAHI_UartSetInterrupt(UART, FALSE, FALSE, FALSE, TRUE, E_AHI_UART_FIFO_LEVEL_1);
+
+    DBG_vPrintf(TRACE_UART, "UART: Initialised\n");
 }
 
 /**

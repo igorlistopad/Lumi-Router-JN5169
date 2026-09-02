@@ -67,7 +67,7 @@ PUBLIC PDM_teStatus APP_eRestoreReports(void)
     PDM_teStatus eStatusReportReload =
         PDM_eReadDataFromRecord(PDM_ID_APP_REPORTS, asSavedReports, sizeof(asSavedReports), &u16ByteRead);
 
-    DBG_vPrintf(TRACE_REPORT, "eStatusReportReload = %d\n", eStatusReportReload);
+    DBG_vPrintf(TRACE_REPORT, "Reporting: Restore status=%d\n", eStatusReportReload);
 
     return eStatusReportReload;
 }
@@ -82,7 +82,7 @@ PUBLIC void APP_vMakeSupportedAttributesReportable(void)
     uint16 u16ClusterId;
     tsZCL_AttributeReportingConfigurationRecord *psAttributeReportingConfigurationRecord;
 
-    DBG_vPrintf(TRACE_REPORT, "Make reportable ep %d\n", LUMIROUTER_APPLICATION_ENDPOINT);
+    DBG_vPrintf(TRACE_REPORT, "Reporting: Apply configuration endpoint=%d\n", LUMIROUTER_APPLICATION_ENDPOINT);
 
     for (i = 0; i < NUMBER_OF_REPORTS; i++) {
         u16AttributeEnum = asSavedReports[i].sAttributeReportingConfigurationRecord.u16AttributeEnum;
@@ -105,7 +105,7 @@ PUBLIC void APP_vLoadDefaultConfigForReportable(void)
 {
     uint8 i;
 
-    DBG_vPrintf(TRACE_REPORT, "Loading default configuration for reports\n");
+    DBG_vPrintf(TRACE_REPORT, "Reporting: Load default configuration\n");
 
     memset(asSavedReports, 0, sizeof(asSavedReports));
 
@@ -131,7 +131,7 @@ APP_vSaveReportableRecord(uint16 u16ClusterID,
         return;
     }
 
-    DBG_vPrintf(TRACE_REPORT, "Save to report %d\n", u8Index);
+    DBG_vPrintf(TRACE_REPORT, "Reporting: Save record index=%d\n", u8Index);
 
     /* Update the reportable record with new configuration */
     asSavedReports[u8Index].u16ClusterID = u16ClusterID;
@@ -165,7 +165,7 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
                            TRUE,
                            &(asDefaultReports[u8Index].sAttributeReportingConfigurationRecord));
 
-    DBG_vPrintf(TRACE_REPORT, "Save to report %d\n", u8Index);
+    DBG_vPrintf(TRACE_REPORT, "Reporting: Restore default record index=%d\n", u8Index);
 
     memcpy(&(asSavedReports[u8Index].sAttributeReportingConfigurationRecord),
            &(asDefaultReports[u8Index].sAttributeReportingConfigurationRecord),
@@ -196,10 +196,11 @@ PRIVATE uint8 APP_u8GetRecordIndex(uint16 u16ClusterID, uint16 u16AttributeEnum)
 PRIVATE void APP_vPrintReportRecord(APP_tsReports *psReport)
 {
     DBG_vPrintf(TRACE_REPORT,
-                "Cluster %04x Type %d Attr %04x Min %d Max %d IntV %d Direct %d Change %d\n",
+                "Reporting: Record cluster=%04x attribute=%04x type=%d "
+                "min=%d max=%d timeout=%d direction=%d change=%d\n",
                 psReport->u16ClusterID,
-                psReport->sAttributeReportingConfigurationRecord.eAttributeDataType,
                 psReport->sAttributeReportingConfigurationRecord.u16AttributeEnum,
+                psReport->sAttributeReportingConfigurationRecord.eAttributeDataType,
                 psReport->sAttributeReportingConfigurationRecord.u16MinimumReportingInterval,
                 psReport->sAttributeReportingConfigurationRecord.u16MaximumReportingInterval,
                 psReport->sAttributeReportingConfigurationRecord.u16TimeoutPeriodField,
