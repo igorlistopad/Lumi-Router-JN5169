@@ -14,7 +14,6 @@
 #include "app_uart.h"
 
 /* SDK JN-SW-4170 */
-#include "AppApi.h"
 #include "AppHardwareApi.h"
 #include "PDM.h"
 #include "bdb_api.h"
@@ -51,18 +50,6 @@ PUBLIC void vAppMain(void)
      * stack is reached. See the linker command file to adjust the allocated
      * stack size. */
     vAHI_SetStackOverflow(TRUE, (uint32)&_stack_low_water_mark);
-
-#ifdef ENABLING_HIGH_POWER_MODE
-    /* After testing on Xiaomi DGNWG05LM and Aqara ZHWG11LM devices, it was
-     * decided to use the deprecated vAppApiSetHighPowerMode method for use on
-     * JN5168 instead of the new vAHI_ModuleConfigure method for use on JN5169.
-     * I checked the following options:
-     * - vAHI_ModuleConfigure(E_MODULE_DEFAULT) does not work on Aqara
-     * - vAHI_ModuleConfigure(E_MODULE_JN5169_001_M03_ETSI) does not work on Aqara
-     * - vAHI_ModuleConfigure(E_MODULE_JN5169_001_M06_FCC) low signal on Xiaomi
-     * - vAppApiSetHighPowerMode (APP_API_MODULE_HPM05, TRUE) works well both on Xiaomi and Aqara */
-    vAppApiSetHighPowerMode(APP_API_MODULE_HPM05, TRUE);
-#endif
 
     DBG_vPrintf(TRACE_APP, "APP: Initialising hardware\n");
     APP_vSetUpHardware();
