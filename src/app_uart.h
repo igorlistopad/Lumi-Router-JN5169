@@ -9,9 +9,8 @@
 #include <jendefs.h>
 
 PUBLIC void UART_vInit(void);
-PUBLIC void UART_vIsr(void);
-PUBLIC void UART_vTxChar(uint8 u8Char);
-PUBLIC bool_t UART_bTxReady(void);
-PUBLIC void UART_vSetTxInterrupt(bool_t bState);
+PUBLIC void UART_vRxIsr(void);
+PUBLIC void UART_vWriteByte(uint8 u8Byte);
+PUBLIC void UART_vWaitForTxComplete(void);
 
 #endif /* APP_UART_H */

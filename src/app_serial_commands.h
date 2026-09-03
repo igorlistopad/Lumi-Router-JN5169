@@ -8,7 +8,7 @@
 
 #include <jendefs.h>
 
-PUBLIC void APP_taskAtSerial(void);
-PUBLIC void APP_WriteMessageToSerial(const char *message);
+PUBLIC void APP_vProcessSerialRx(void);
+PUBLIC void APP_vSendSerialMessage(const char *pcMessage);
 
 #endif /* APP_SERIAL_COMMANDS_H */

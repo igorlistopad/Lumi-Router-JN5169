@@ -12,14 +12,12 @@
 #include "ZQueue.h"
 
 extern PUBLIC uint8 u8TimerTick;
-extern PUBLIC uint8 u8TimerRestart;
 extern PUBLIC uint8 u8TimerDeviceTemperature;
 extern PUBLIC tszQueue APP_msgBdbEvents;
 extern PUBLIC tszQueue zps_TimeEvents;
 extern PUBLIC tszQueue zps_msgMlmeDcfmInd;
 extern PUBLIC tszQueue zps_msgMcpsDcfmInd;
 extern PUBLIC tszQueue zps_msgMcpsDcfm;
-extern PUBLIC tszQueue APP_msgSerialTx;
 extern PUBLIC tszQueue APP_msgSerialRx;
 
 PUBLIC void APP_vMainLoop(void);

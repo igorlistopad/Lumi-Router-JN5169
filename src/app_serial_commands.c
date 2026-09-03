@@ -11,24 +11,24 @@
 #include "app_uart.h"
 
 /* SDK JN-SW-4170 */
+#include "AppHardwareApi.h"
 #include "PDM.h"
 #include "ZQueue.h"
-#include "ZTimer.h"
 #include "dbg.h"
-#include "portmacro.h"
 
 #ifndef TRACE_SERIAL
 #define TRACE_SERIAL FALSE
 #endif
 
-#define SL_START_CHAR    0x01
-#define SL_ESC_CHAR      0x02
-#define SL_END_CHAR      0x03
+#define SL_START_CHAR     0x01U
+#define SL_ESC_CHAR       0x02U
+#define SL_END_CHAR       0x03U
 #define SL_HEADER_SIZE    4U
 #define SL_FRAME_MIN_SIZE 5U
 #define SL_FRAME_MAX_SIZE 6U
 #define SL_RX_IDLE        0xFFU
-#define RESTART_DELAY_MS ZTIMER_TIME_MSEC(50)
+
+#define SERIAL_RX_PROCESS_LIMIT 16U
 
 /* Serial link message types */
 enum {
@@ -38,31 +38,34 @@ enum {
 
 PRIVATE void APP_vProcessRxChar(uint8 u8Char);
 PRIVATE void APP_vProcessCommand(uint8 u8Command);
-PRIVATE void APP_vWriteTxChar(uint8 u8Char);
-
-PRIVATE uint32 u32CriticalSectionStorage;
 
 /**
- * @brief Task that obtains a message from the serial Rx message queue.
+ * @brief Process queued serial receive data
  */
-PUBLIC void APP_taskAtSerial(void)
+PUBLIC void APP_vProcessSerialRx(void)
 {
     uint8 u8RxByte;
-    while (ZQ_bQueueReceive(&APP_msgSerialRx, &u8RxByte)) {
+    uint8 u8BytesProcessed = 0U;
+
+    while ((u8BytesProcessed < SERIAL_RX_PROCESS_LIMIT) &&
+           ZQ_bQueueReceive(&APP_msgSerialRx, &u8RxByte)) {
         APP_vProcessRxChar(u8RxByte);
+        u8BytesProcessed++;
     }
 }
 
 /**
- * @brief Write message to the serial link
+ * @brief Send a serial message and wait for transmission to complete
  */
-PUBLIC void APP_WriteMessageToSerial(const char *message)
+PUBLIC void APP_vSendSerialMessage(const char *pcMessage)
 {
-    DBG_vPrintf(TRACE_SERIAL, "Serial: TX message=\"%s\"\n", message);
+    DBG_vPrintf(TRACE_SERIAL, "Serial: TX message=\"%s\"\n", pcMessage);
 
-    for (; *message != '\0'; message++) {
-        APP_vWriteTxChar((uint8)*message);
+    for (; *pcMessage != '\0'; pcMessage++) {
+        UART_vWriteByte((uint8)*pcMessage);
     }
+
+    UART_vWaitForTxComplete();
 }
 
 /**
@@ -131,7 +134,7 @@ PRIVATE void APP_vProcessRxChar(uint8 u8Char)
 }
 
 /**
- * @brief Execute a decoded jntool command.
+ * @brief Process a decoded jntool command.
  */
 PRIVATE void APP_vProcessCommand(uint8 u8Command)
 {
@@ -139,46 +142,19 @@ PRIVATE void APP_vProcessCommand(uint8 u8Command)
 
     switch (u8Command) {
     case E_SC_MSG_RESET:
-        APP_WriteMessageToSerial("Reset...........");
-        ZTIMER_eStart(u8TimerRestart, RESTART_DELAY_MS);
+        APP_vSendSerialMessage("Reset...........");
+        vAHI_SwReset();
         break;
 
     case E_SC_MSG_ERASE_PERSISTENT_DATA:
-        APP_WriteMessageToSerial("Erase PDM.......");
+        APP_vSendSerialMessage("Erase PDM.......");
+        APP_vSendSerialMessage("Reset...........");
         PDM_vDeleteAllDataRecords();
-        APP_WriteMessageToSerial("Reset...........");
-        ZTIMER_eStart(u8TimerRestart, RESTART_DELAY_MS);
+        vAHI_SwReset();
         break;
 
     default:
-        APP_WriteMessageToSerial("Unknown command.");
+        APP_vSendSerialMessage("Unknown command.");
         break;
-    }
-}
-
-/**
- * @brief Write byte to the serial link
- */
-PRIVATE void APP_vWriteTxChar(uint8 u8Char)
-{
-    bool_t bByteDropped = FALSE;
-
-    ZPS_eEnterCriticalSection(NULL, &u32CriticalSectionStorage);
-
-    if (UART_bTxReady() && ZQ_bQueueIsEmpty(&APP_msgSerialTx)) {
-        /* send byte now and enable irq */
-        UART_vTxChar(u8Char);
-        UART_vSetTxInterrupt(TRUE);
-    }
-    else {
-        if (!ZQ_bQueueSend(&APP_msgSerialTx, &u8Char)) {
-            bByteDropped = TRUE;
-        }
-    }
-
-    ZPS_eExitCriticalSection(NULL, &u32CriticalSectionStorage);
-
-    if (bByteDropped) {
-        DBG_vPrintf(TRACE_SERIAL, "Serial: TX queue full, byte dropped\n");
     }
 }

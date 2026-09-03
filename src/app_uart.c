@@ -18,27 +18,27 @@
 #define TRACE_UART FALSE
 #endif
 
-#define UART           E_AHI_UART_0
-#define MAX_TX_BUFFER  16
-#define MAX_RX_BUFFER  64
+#define UART               E_AHI_UART_0
+#define UART_TX_FIFO_SIZE  16U
+#define UART_RX_FIFO_SIZE  64U
 
-PRIVATE uint8 au8UartHwTxFifo[MAX_TX_BUFFER];
-PRIVATE uint8 au8UartHwRxFifo[MAX_RX_BUFFER];
+PRIVATE uint8 au8UartTxFifo[UART_TX_FIFO_SIZE];
+PRIVATE uint8 au8UartRxFifo[UART_RX_FIFO_SIZE];
 
 /**
- * @brief Initialise the UART peripheral
+ * @brief Initialise the UART interface
  */
 PUBLIC void UART_vInit(void)
 {
     vAHI_UartSetRTSCTS(UART, FALSE);
 
-    if (!bAHI_UartEnable(UART, au8UartHwTxFifo, MAX_TX_BUFFER, au8UartHwRxFifo, MAX_RX_BUFFER)) {
+    if (!bAHI_UartEnable(UART, au8UartTxFifo, UART_TX_FIFO_SIZE, au8UartRxFifo, UART_RX_FIFO_SIZE)) {
         DBG_vPrintf(TRACE_UART, "UART: Initialisation failed\n");
         return;
     }
 
-    vAHI_UartReset(UART, TRUE, TRUE);
-    vAHI_UartReset(UART, FALSE, FALSE);
+    vAHI_UartReset(UART, E_AHI_UART_TX_RESET, E_AHI_UART_RX_RESET);
+    vAHI_UartReset(UART, E_AHI_UART_TX_ENABLE, E_AHI_UART_RX_ENABLE);
 
     vAHI_UartSetBaudRate(UART, E_AHI_UART_RATE_115200);
 
@@ -49,57 +49,33 @@ PUBLIC void UART_vInit(void)
 }
 
 /**
- * @brief Handle interrupts from UART
+ * @brief Handle UART receive interrupts
  */
-PUBLIC void UART_vIsr(void)
+PUBLIC void UART_vRxIsr(void)
 {
-    uint8 u8Byte;
-    uint8 u8InterruptId = (uint8)((u8AHI_UartReadInterruptStatus(UART) >> 1) & 0x07U);
+    uint8 u8Byte = u8AHI_UartReadData(UART);
 
-    switch (u8InterruptId) {
-    case E_AHI_UART_INT_RXDATA:
-    case E_AHI_UART_INT_TIMEOUT:
-        u8Byte = u8AHI_UartReadData(UART);
-        if (!ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte)) {
-            DBG_vPrintf(TRACE_UART, "UART: RX queue full, byte dropped\n");
-        }
-        break;
-
-    case E_AHI_UART_INT_TX:
-        if (ZQ_bQueueReceive(&APP_msgSerialTx, &u8Byte)) {
-            vAHI_UartWriteData(UART, u8Byte);
-        }
-        else {
-            /* Prevent repeated TX-empty interrupts while the queue is empty. */
-            UART_vSetTxInterrupt(FALSE);
-        }
-        break;
-
-    default:
-        break;
+    if (!ZQ_bQueueSend(&APP_msgSerialRx, &u8Byte)) {
+        DBG_vPrintf(TRACE_UART, "UART: RX queue full, byte dropped\n");
     }
 }
 
 /**
- * @brief Send the character
+ * @brief Wait for available TX FIFO space and write one byte
  */
-PUBLIC void UART_vTxChar(uint8 u8Char)
+PUBLIC void UART_vWriteByte(uint8 u8Byte)
 {
-    vAHI_UartWriteData(UART, u8Char);
+    while (u16AHI_UartReadTxFifoLevel(UART) >= UART_TX_FIFO_SIZE)
+        ;
+
+    vAHI_UartWriteData(UART, u8Byte);
 }
 
 /**
- * @brief Check if the UART transmitter is ready
+ * @brief Wait until UART transmission is complete
  */
-PUBLIC bool_t UART_bTxReady(void)
+PUBLIC void UART_vWaitForTxComplete(void)
 {
-    return (bool_t)(u8AHI_UartReadLineStatus(UART) & E_AHI_UART_LS_THRE);
-}
-
-/**
- * @brief Enable / disable the tx interrupt
- */
-PUBLIC void UART_vSetTxInterrupt(bool_t bState)
-{
-    vAHI_UartSetInterrupt(UART, FALSE, FALSE, bState, TRUE, E_AHI_UART_FIFO_LEVEL_1);
+    while ((u8AHI_UartReadLineStatus(UART) & E_AHI_UART_LS_TEMT) == 0U)
+        ;
 }

@@ -38,7 +38,7 @@ PIC_ChannelPriorities:
     .section .text,"ax"
     .extern zps_isrMAC
     .extern ISR_vTickTimer
-    .extern UART_vIsr
+    .extern UART_vRxIsr
     .align 4
     .type   PIC_SwVectTable, @object
     .size   PIC_SwVectTable, 64
@@ -48,7 +48,7 @@ PIC_SwVectTable:
     .word vUnclaimedInterrupt               # 2
     .word vUnclaimedInterrupt               # 3
     .word vUnclaimedInterrupt               # 4
-    .word UART_vIsr                         # 5
+    .word UART_vRxIsr                       # 5
     .word vUnclaimedInterrupt               # 6
     .word zps_isrMAC                        # 7
     .word vUnclaimedInterrupt               # 8

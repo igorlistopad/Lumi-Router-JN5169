@@ -8,7 +8,6 @@
 /* Application */
 #include "app_device_temperature.h"
 #include "app_main.h"
-#include "app_router_node.h"
 #include "app_serial_commands.h"
 #include "app_zcl_task.h"
 
@@ -22,20 +21,17 @@
 #include "pwrm.h"
 #include "zps_apl_af.h"
 
-#define APP_ZTIMER_STORAGE   3
+#define APP_ZTIMER_STORAGE   2
 #define BDB_QUEUE_SIZE       3
 #define TIMER_QUEUE_SIZE     8
 #define MLME_QUEUE_SIZE      10
 #define MCPS_QUEUE_SIZE      24
 #define MCPS_DCFM_QUEUE_SIZE 8
-#define TX_QUEUE_SIZE        32
 #define RX_QUEUE_SIZE        64
 
 PUBLIC uint8 u8TimerTick;
-PUBLIC uint8 u8TimerRestart;
 PUBLIC uint8 u8TimerDeviceTemperature;
 PUBLIC tszQueue APP_msgBdbEvents;
-PUBLIC tszQueue APP_msgSerialTx;
 PUBLIC tszQueue APP_msgSerialRx;
 
 PRIVATE ZTIMER_tsTimer asTimers[APP_ZTIMER_STORAGE + BDB_ZTIMER_STORAGE];
@@ -44,7 +40,6 @@ PRIVATE zps_tsTimeEvent asTimeEvent[TIMER_QUEUE_SIZE];
 PRIVATE MAC_tsMlmeVsDcfmInd asMacMlmeVsDcfmInd[MLME_QUEUE_SIZE];
 PRIVATE MAC_tsMcpsVsDcfmInd asMacMcpsDcfmInd[MCPS_QUEUE_SIZE];
 PRIVATE MAC_tsMcpsVsCfmData asMacMcpsDcfm[MCPS_DCFM_QUEUE_SIZE];
-PRIVATE uint8 au8TxBuffer[TX_QUEUE_SIZE];
 PRIVATE uint8 au8RxBuffer[RX_QUEUE_SIZE];
 
 extern void zps_taskZPS(void);
@@ -66,7 +61,7 @@ PUBLIC void APP_vMainLoop(void)
         ZTIMER_vTask();
 
         /* Processes serial Rx message queue */
-        APP_taskAtSerial();
+        APP_vProcessSerialRx();
 
         /* Reload the watchdog after one complete pass of cooperative processing.
          * If this loop stops making progress, the watchdog resets the device. */
@@ -98,7 +93,6 @@ PUBLIC void APP_vInitResources(void)
 
     /* Create Z timers */
     ZTIMER_eOpen(&u8TimerTick, APP_cbTimerZclTick, NULL, ZTIMER_FLAG_PREVENT_SLEEP);
-    ZTIMER_eOpen(&u8TimerRestart, APP_cbTimerRestart, NULL, ZTIMER_FLAG_PREVENT_SLEEP);
     ZTIMER_eOpen(&u8TimerDeviceTemperature, APP_cbTimerDeviceTemperatureUpdate, NULL, ZTIMER_FLAG_PREVENT_SLEEP);
 
     /* Create all the queues */
@@ -107,6 +101,5 @@ PUBLIC void APP_vInitResources(void)
     ZQ_vQueueCreate(&zps_msgMlmeDcfmInd, MLME_QUEUE_SIZE, sizeof(MAC_tsMlmeVsDcfmInd), (uint8 *)asMacMlmeVsDcfmInd);
     ZQ_vQueueCreate(&zps_msgMcpsDcfmInd, MCPS_QUEUE_SIZE, sizeof(MAC_tsMcpsVsDcfmInd), (uint8 *)asMacMcpsDcfmInd);
     ZQ_vQueueCreate(&zps_msgMcpsDcfm, MCPS_DCFM_QUEUE_SIZE, sizeof(MAC_tsMcpsVsCfmData), (uint8 *)asMacMcpsDcfm);
-    ZQ_vQueueCreate(&APP_msgSerialTx, TX_QUEUE_SIZE, sizeof(uint8), (uint8 *)au8TxBuffer);
     ZQ_vQueueCreate(&APP_msgSerialRx, RX_QUEUE_SIZE, sizeof(uint8), (uint8 *)au8RxBuffer);
 }

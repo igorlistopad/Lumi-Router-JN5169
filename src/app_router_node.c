@@ -98,17 +98,7 @@ PUBLIC void APP_vInitialiseRouter(void)
     APP_vPrintAPSTable();
 #endif
 
-    APP_WriteMessageToSerial("Router started..");
-}
-
-/**
- * @brief Restart timer callback.
- * @todo Move this callback to app_serial_commands.c and add support for reset and PDM erase commands.
- */
-PUBLIC void APP_cbTimerRestart(void *pvParam)
-{
-    (void)pvParam;
-    vAHI_SwReset();
+    APP_vSendSerialMessage("Router started..");
 }
 
 /**
