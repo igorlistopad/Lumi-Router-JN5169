@@ -1,0 +1,68 @@
+name: Release
+run-name: Release ${{ github.ref_name }}
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build.yml
+
+  release:
+    name: Create draft release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download firmware files
+      uses: actions/download-artifact@v8
+      with:
+        pattern: LumiRouter-*.bin
+        path: firmware
+        merge-multiple: true
+
+    - name: Check for published release
+      uses: actions/github-script@v9
+      with:
+        script: |
+          const tag = process.env.GITHUB_REF_NAME;
+          try {
+            await github.rest.repos.getReleaseByTag({ ...context.repo, tag });
+          } catch (error) {
+            if (error.status === 404) return;
+            throw error;
+          }
+          core.setFailed(`Release ${tag} is already published.`);
+
+    - name: Calculate SHA-256
+      id: checksums
+      shell: bash
+      run: |
+        sha256sum firmware/LumiRouter-DGNWG05LM.bin | awk '{print "xiaomi=" $1}' >> "$GITHUB_OUTPUT"
+        sha256sum firmware/LumiRouter-ZHWG11LM.bin | awk '{print "aqara=" $1}' >> "$GITHUB_OUTPUT"
+
+    - name: Create draft release
+      uses: softprops/action-gh-release@v3
+      with:
+        draft: true
+        files: firmware/LumiRouter-*.bin
+        body: |
+          ## Firmware files
+
+          > [!WARNING]
+          > The firmware files are **not interchangeable**: they use different radio settings. Choose the file for your device model.
+
+          | Device | File | SHA-256 |
+          |---|---|---|
+          | Xiaomi DGNWG05LM | `LumiRouter-DGNWG05LM.bin` | `${{ steps.checksums.outputs.xiaomi }}` |
+          | Aqara ZHWG11LM | `LumiRouter-ZHWG11LM.bin` | `${{ steps.checksums.outputs.aqara }}` |
+
+          **Build**: [GitHub Actions #${{ github.run_id }}][build-run]
+
+          [build-run]: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>

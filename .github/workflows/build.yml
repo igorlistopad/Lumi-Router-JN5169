@@ -2,9 +2,7 @@ name: Build Firmware
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
+  workflow_call:
 
 permissions:
   contents: read
