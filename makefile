@@ -9,7 +9,7 @@ BOARD ?=
 CFLAGS += -DBOARD_$(BOARD)
 
 # Application version
-VERSION_STRING ?= 26.10.0-beta1
+VERSION_STRING ?= 26.10.0-beta2
 CFLAGS         += -DVERSION_STRING=\"$(VERSION_STRING)\"
 
 # Application build date
