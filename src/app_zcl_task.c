@@ -11,6 +11,7 @@
 #include "zps_gen.h"
 
 /* Application */
+#include "app_green_power.h"
 #include "app_main.h"
 #include "app_reporting.h"
 #include "app_zcl_task.h"
@@ -20,6 +21,7 @@
 #include "Basic.h"
 #include "Identify.h"
 #include "DeviceTemperatureConfiguration.h"
+#include "GreenPower.h"
 #include "ZTimer.h"
 #include "dbg.h"
 #include "zcl.h"
@@ -30,7 +32,6 @@
 
 #define ZCL_TICK_TIME ZTIMER_TIME_SEC(1)
 
-PRIVATE void APP_ZCL_vTick(void);
 PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent);
 PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent);
 PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent);
@@ -53,7 +54,7 @@ APP_CHECK_BASIC_STRING(APP_tVersionSizeCheck, CLD_BAS_SW_BUILD_SIZE, au8SWBuildI
 #undef APP_CHECK_BASIC_STRING
 
 /**
- * @brief Initialises ZCL, registers the application endpoint, and starts the tick timer
+ * @brief Initialises ZCL, registers the endpoints, and starts the tick timers
  */
 PUBLIC void APP_ZCL_vInitialise(void)
 {
@@ -74,6 +75,12 @@ PUBLIC void APP_ZCL_vInitialise(void)
         DBG_vPrintf(TRACE_ZCL, "ZCL Endpoint Registration: Error status=%x\n", eZCL_Status);
     }
 
+    /* Initialise Green Power Proxy Basic */
+    eZCL_Status = APP_eInitGreenPower(&APP_ZCL_cbEndpointCallback);
+    if (eZCL_Status != E_ZCL_SUCCESS) {
+        DBG_vPrintf(TRACE_ZCL, "ZCL Green Power Initialisation: Error status=%x\n", eZCL_Status);
+    }
+
     APP_ZCL_vDeviceSpecific_Init();
 }
 
@@ -82,36 +89,23 @@ PUBLIC void APP_ZCL_vInitialise(void)
  */
 PUBLIC void APP_ZCL_vEventHandler(ZPS_tsAfEvent *psStackEvent)
 {
-    tsZCL_CallBackEvent sCallBackEvent;
-    sCallBackEvent.pZPSevent = psStackEvent;
-
     DBG_vPrintf(TRACE_ZCL, "ZCL Stack Event: type=%d\n", psStackEvent->eType);
-    sCallBackEvent.eEventType = E_ZCL_CBET_ZIGBEE_EVENT;
+
+    tsZCL_CallBackEvent sCallBackEvent = {.eEventType = E_ZCL_CBET_ZIGBEE_EVENT, .pZPSevent = psStackEvent};
     vZCL_EventHandler(&sCallBackEvent);
 }
 
 /**
- * @brief Handles expiration of the ZCL tick timer
+ * @brief Dispatches the one-second ZCL tick and restarts the timer
  */
 PUBLIC void APP_cbTimerZclTick(void *pvParam)
 {
     (void)pvParam;
 
-    /* Notify ZCL of the one-second tick, then re-arm the application timer. */
-    APP_ZCL_vTick();
-    ZTIMER_eStart(u8TimerTick, ZCL_TICK_TIME);
-}
-
-/**
- * @brief Dispatches a timer tick event to ZCL
- */
-PRIVATE void APP_ZCL_vTick(void)
-{
-    tsZCL_CallBackEvent sCallBackEvent;
-
-    sCallBackEvent.pZPSevent = NULL;
-    sCallBackEvent.eEventType = E_ZCL_CBET_TIMER;
+    tsZCL_CallBackEvent sCallBackEvent = {.eEventType = E_ZCL_CBET_TIMER};
     vZCL_EventHandler(&sCallBackEvent);
+
+    ZTIMER_eStart(u8TimerTick, ZCL_TICK_TIME);
 }
 
 /**
@@ -122,6 +116,10 @@ PRIVATE void APP_ZCL_cbGeneralCallback(tsZCL_CallBackEvent *psEvent)
     switch (psEvent->eEventType) {
     case E_ZCL_CBET_ERROR:
         DBG_vPrintf(TRACE_ZCL, "ZCL General Callback: Error status=%x\n", psEvent->eZCL_Status);
+        break;
+
+    case E_ZCL_CBET_ZGP_DATA_IND_ERROR:
+        DBG_vPrintf(TRACE_ZCL, "ZCL General Callback: GP data indication error status=%x\n", psEvent->eZCL_Status);
         break;
 
     case E_ZCL_CBET_UNHANDLED_EVENT:
@@ -217,22 +215,29 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
  */
 PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent)
 {
-    if (psEvent->uMessage.sClusterCustomMessage.u16ClusterId == GENERAL_CLUSTER_ID_IDENTIFY) {
+    switch (psEvent->uMessage.sClusterCustomMessage.u16ClusterId) {
+    case GENERAL_CLUSTER_ID_IDENTIFY: {
         tsCLD_IdentifyCallBackMessage *psMessage =
             (tsCLD_IdentifyCallBackMessage *)psEvent->uMessage.sClusterCustomMessage.pvCustomData;
 
-        switch (psMessage->u8CommandId) {
-        case E_CLD_IDENTIFY_CMD_IDENTIFY:
+        if (psMessage->u8CommandId == E_CLD_IDENTIFY_CMD_IDENTIFY) {
             /* This module has no physical indicator, so no indication is started or stopped. */
             DBG_vPrintf(TRACE_ZCL,
                         "ZCL Endpoint Callback: Identify time=%d\n",
                         psMessage->uMessage.psIdentifyRequestPayload->u16IdentifyTime);
-            break;
-
-        case E_CLD_IDENTIFY_CMD_IDENTIFY_QUERY:
-            DBG_vPrintf(TRACE_ZCL, "ZCL Endpoint Callback: Identify query\n");
-            break;
         }
+        else if (psMessage->u8CommandId == E_CLD_IDENTIFY_CMD_IDENTIFY_QUERY) {
+            DBG_vPrintf(TRACE_ZCL, "ZCL Endpoint Callback: Identify query\n");
+        }
+        break;
+    }
+
+    case GREENPOWER_CLUSTER_ID: {
+        tsGP_GreenPowerCallBackMessage *psMessage =
+            (tsGP_GreenPowerCallBackMessage *)psEvent->uMessage.sClusterCustomMessage.pvCustomData;
+        APP_vHandleGreenPowerEvent(psMessage);
+        break;
+    }
     }
 }
 

@@ -93,7 +93,10 @@
         <Clusters Name="Identify" Id="0x0003"/>
         <Clusters Name="Default" Id="0xFFFF"/>
     </Profiles>
-    <ChildNodes xsi:type="zpscfg:Router" Name="LumiRouter" DiscoveryNeighbourTableSize="16" ActiveNeighbourTableSize="26" RouteDiscoveryTableSize="4" RoutingTableSize="70" BroadcastTransactionTableSize="25" RouteRecordTableSize="1" AddressMapTableSize="10" SecurityMaterialSets="2" MaxNumSimultaneousApsdeReq="5" MaxNumSimultaneousApsdeAckReq="3" MACMutexName="mutexMAC" ZPSMutexName="" FragmentationMaxNumSimulRx="0" FragmentationMaxNumSimulTx="0" DefaultEventMessageName="APP_vZpsEventHandler" MACDcfmIndMessage="zps_msgDcfmInd" MACTimeEventMessage="zps_msgTimeEvents" apsNonMemberRadius="2" apsDesignatedCoordinator="false" apsUseInsecureJoin="false" apsMaxWindowSize="8" apsInterframeDelay="10" APSDuplicateTableSize="8" apsSecurityTimeoutPeriod="6000" apsUseExtPANId="0x0000000000000000" SecurityEnabled="true" MACMlmeDcfmIndMessage="zps_msgMlmeDcfmInd" MACMcpsDcfmIndMessage="zps_msgMcpsDcfmInd" APSPersistenceTime="100" NumAPSMESimulCommands="4" StackProfile="2" InterPAN="false" GreenPowerSupport="false" NwkFcSaveCountBitShift="10" ApsFcSaveCountBitShift="10" MacTableSize="36" DefaultCallbackName="APP_vGenCallback" PermitJoiningTime="0" ChildTableSize="13" ScanDuration="3" NetworkSelection="User Selected">
+    <Profiles Name="GP" Id="0xA1E0">
+        <Clusters Name="GreenPower" Id="0x0021"/>
+    </Profiles>
+    <ChildNodes xsi:type="zpscfg:Router" Name="LumiRouter" DiscoveryNeighbourTableSize="16" ActiveNeighbourTableSize="26" RouteDiscoveryTableSize="4" RoutingTableSize="70" BroadcastTransactionTableSize="25" RouteRecordTableSize="1" AddressMapTableSize="10" SecurityMaterialSets="2" MaxNumSimultaneousApsdeReq="5" MaxNumSimultaneousApsdeAckReq="3" MACMutexName="mutexMAC" ZPSMutexName="" FragmentationMaxNumSimulRx="0" FragmentationMaxNumSimulTx="0" DefaultEventMessageName="APP_vZpsEventHandler" MACDcfmIndMessage="zps_msgDcfmInd" MACTimeEventMessage="zps_msgTimeEvents" apsNonMemberRadius="2" apsDesignatedCoordinator="false" apsUseInsecureJoin="false" apsMaxWindowSize="8" apsInterframeDelay="10" APSDuplicateTableSize="8" apsSecurityTimeoutPeriod="6000" apsUseExtPANId="0x0000000000000000" SecurityEnabled="true" MACMlmeDcfmIndMessage="zps_msgMlmeDcfmInd" MACMcpsDcfmIndMessage="zps_msgMcpsDcfmInd" APSPersistenceTime="100" NumAPSMESimulCommands="4" StackProfile="2" InterPAN="false" GreenPowerSupport="true" NwkFcSaveCountBitShift="10" ApsFcSaveCountBitShift="10" MacTableSize="36" DefaultCallbackName="APP_vGenCallback" PermitJoiningTime="0" ChildTableSize="13" ScanDuration="3" NetworkSelection="User Selected">
         <Endpoints Id="0" Enabled="true" ApplicationDeviceId="0" ApplicationDeviceVersion="0" Profile="ZDP" Message="" Name="ZDO">
             <InputClusters Cluster="NWK_addr_req" RxAPDU="LumiRouter->apduZDP" Discoverable="false"/>
             <InputClusters Cluster="IEEE_addr_req" RxAPDU="LumiRouter->apduZDP" Discoverable="false"/>
@@ -270,6 +273,10 @@
             <InputClusters Cluster="DeviceTemperatureConfiguration" RxAPDU="LumiRouter->apduZCL" Discoverable="true"/>
             <InputClusters Cluster="Default" RxAPDU="LumiRouter->apduZCL" Discoverable="false"/>
         </Endpoints>
+        <Endpoints Id="242" Enabled="true" ApplicationDeviceId="0x0061" ApplicationDeviceVersion="0" Profile="GP" Name="GreenPowerProxy">
+            <InputClusters Cluster="GreenPower" RxAPDU="LumiRouter->apduZCL" Discoverable="false"/>
+            <OutputClusters Cluster="GreenPower" TxAPDUs="LumiRouter->apduZCL" Discoverable="true"/>
+        </Endpoints>
         <PDUConfiguration NumNPDUs="25" PDUMMutexName="mutexPDUM">
             <APDUs Id="LumiRouter->apduZDP" Name="apduZDP" Size="100" Instances="9"/>
             <APDUs Id="LumiRouter->apduZCL" Name="apduZCL" Size="100" Instances="10"/>
@@ -279,6 +286,8 @@
         <NodePowerDescriptor ConstantPower="true" RechargeableBattery="false" DisposableBattery="false" DefaultPowerSource="Constant Power" DefaultPowerMode="Synchronised with RxOnWhenIdle"/>
         <BindingTable Size="4"/>
         <KeyDescriptorTable Size="1"/>
+        <GreenPowerTxQueue Size="5"/>
+        <GreenPowerSecurityTable Size="5"/>
         <MacInterfaceList>
             <MacInterface RouterAllowed="true" ChannelListSize="1" index="0" RadioType="RT2400MHz" Enabled="true"/>
         </MacInterfaceList>

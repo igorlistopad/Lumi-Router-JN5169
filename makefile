@@ -45,6 +45,10 @@ STACK_SIZE        = 5000
 MINIMUM_HEAP_SIZE = 2000
 ZNCLKCMD = AppBuildZBPro.ld
 
+# Green Power Proxy Basic sources
+GP_SUPPORT = 1
+APP_CLUSTERS_GREENPOWER_SRC = 1
+
 # Debug options
 DEBUG ?=
 DEBUG_ENABLED := 0
@@ -62,6 +66,7 @@ ifeq ($(DEBUG_ENABLED), 1)
 	CFLAGS += -DDEBUG_ENABLED
 	CFLAGS += -DDEBUG_BDB
 	CFLAGS += -DTRACE_APP=1
+	CFLAGS += -DTRACE_GP=1
 	CFLAGS += -DTRACE_REPORT=1
 	CFLAGS += -DTRACE_ZCL=1
 	CFLAGS += -DTRACE_UART=1
@@ -107,6 +112,7 @@ APPSRC += app_start.c
 APPSRC += app_main.c
 APPSRC += app_router_node.c
 APPSRC += app_zcl_task.c
+APPSRC += app_green_power.c
 APPSRC += app_reporting.c
 APPSRC += app_serial_commands.c
 APPSRC += app_device_temperature.c
@@ -122,8 +128,8 @@ INCFLAGS += -I$(COMPONENTS_BASE_DIR)/ZCL/Include
 INCFLAGS += -I$(COMPONENTS_BASE_DIR)/Xcv/Include/
 INCFLAGS += -I$(COMPONENTS_BASE_DIR)/Recal/Include/
 
-# Inter-PAN and Green Power are disabled in app.zpscfg.
-OPTIONAL_STACK_FEATURES := 0
+# Optional stack features enabled in app.zpscfg
+OPTIONAL_STACK_FEATURES = $(shell $(ZPSCONFIG) -n $(TARGET) -f $(APP_SRC_DIR)/$(APP_ZPSCFG) -y)
 
 # Configure for the selected chip or chip family
 -include $(SDK_BASE_DIR)/Chip/Common/Build/config.mk

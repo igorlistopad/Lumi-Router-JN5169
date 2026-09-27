@@ -12,7 +12,10 @@
 #define ZCL_MANUFACTURER_CODE 0x1037
 
 /* Number of endpoints supported by this device */
-#define ZCL_NUMBER_OF_ENDPOINTS 1
+#define ZCL_NUMBER_OF_ENDPOINTS 2
+
+/* Reserve one ZCL timer for Green Power. */
+#define ZCL_NUMBER_OF_APPLICATION_TIMERS 1
 
 /* Set this True to disable non-error default responses from clusters */
 #define ZCL_DISABLE_DEFAULT_RESPONSES (TRUE)
@@ -45,6 +48,10 @@ enum {
 #define IDENTIFY_SERVER
 #define CLD_DEVICE_TEMPERATURE_CONFIGURATION
 #define DEVICE_TEMPERATURE_CONFIGURATION_SERVER
+
+/* Enable Green Power Proxy Basic support. */
+#define CLD_GREENPOWER
+#define GP_PROXY_BASIC_DEVICE
 
 /* Basic cluster optional attributes */
 #define CLD_BAS_ATTR_MANUFACTURER_NAME

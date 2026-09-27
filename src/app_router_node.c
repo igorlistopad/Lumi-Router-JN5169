@@ -11,6 +11,7 @@
 /* Application */
 #include "PDM_IDs.h"
 #include "app_device_temperature.h"
+#include "app_green_power.h"
 #include "app_main.h"
 #include "app_reporting.h"
 #include "app_router_node.h"
@@ -317,28 +318,25 @@ PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
 {
     ZPS_tsAfEvent *psAfEvent = &psZpsAfEvent->sStackEvent;
 
-    switch (psZpsAfEvent->u8EndPoint) {
-    case LUMIROUTER_APPLICATION_ENDPOINT:
-        if (psAfEvent->eType == ZPS_EVENT_APS_DATA_INDICATION) {
+    if ((psZpsAfEvent->u8EndPoint == LUMIROUTER_APPLICATION_ENDPOINT) ||
+        (psZpsAfEvent->u8EndPoint == ZCL_GP_PROXY_ENDPOINT_ID) ||
+        (psAfEvent->eType == ZPS_EVENT_APS_ZGP_DATA_CONFIRM)) {
+        if ((psAfEvent->eType == ZPS_EVENT_APS_DATA_INDICATION) ||
+            (psAfEvent->eType == ZPS_EVENT_APS_ZGP_DATA_INDICATION) ||
+            (psAfEvent->eType == ZPS_EVENT_APS_ZGP_DATA_CONFIRM)) {
             APP_ZCL_vEventHandler(psAfEvent);
         }
-        break;
-
-    case LUMIROUTER_ZDO_ENDPOINT:
+    }
+    else if (psZpsAfEvent->u8EndPoint == LUMIROUTER_ZDO_ENDPOINT) {
         APP_vHandleZdoEvents(psZpsAfEvent);
-        break;
-
-    default:
-        DBG_vPrintf(TRACE_APP,
-                    "APP-AF: Unexpected endpoint=%u event type=%d\n",
-                    psZpsAfEvent->u8EndPoint,
-                    psAfEvent->eType);
-        break;
     }
 
-    /* Free the APS data indication APDU. */
+    /* Free the data indication APDU. */
     if (psAfEvent->eType == ZPS_EVENT_APS_DATA_INDICATION) {
         PDUM_eAPduFreeAPduInstance(psAfEvent->uEvent.sApsDataIndEvent.hAPduInst);
+    }
+    else if (psAfEvent->eType == ZPS_EVENT_APS_ZGP_DATA_INDICATION) {
+        PDUM_eAPduFreeAPduInstance(psAfEvent->uEvent.sApsZgpDataIndEvent.hAPduInst);
     }
 }
 
@@ -526,6 +524,7 @@ PRIVATE void APP_vFactoryResetRecords(void)
     /* Persist factory-default application and stack state. */
     APP_vSetNodeState(E_NODE_NOT_JOINED);
     APP_vLoadDefaultReports();
+    APP_vRestoreGreenPowerDefaults();
     ZPS_vSaveAllZpsRecords();
 }
 
