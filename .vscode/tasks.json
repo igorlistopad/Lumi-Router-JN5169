@@ -8,9 +8,15 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Generate Configuration",
+			"type": "shell",
+			"command": "make \"${workspaceFolder}/src/pdum_gen.h\" \"${workspaceFolder}/src/zps_gen.h\"",
+			"problemMatcher": []
+		},
+		{
 			"label": "Build",
 			"type": "shell",
-			"command": "make BOARD=${input:board}",
+			"command": "make BOARD=${input:board} DEBUG=${input:debug}",
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -41,6 +47,20 @@
 				"DGNWG05LM",
 				"ZHWG11LM"
 			]
+		},
+		{
+			"id": "debug",
+			"type": "pickString",
+			"description": "Select debug output",
+			"options": [
+				{
+					"label": "Disabled",
+					"value": ""
+				},
+				"UART0",
+				"UART1"
+			],
+			"default": ""
 		}
 	]
 }

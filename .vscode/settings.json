@@ -1,0 +1,14 @@
+{
+	"C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+	"makefile.configurations": [
+		{
+			"name": "DGNWG05LM",
+			"makeArgs": ["BOARD=DGNWG05LM"]
+		},
+		{
+			"name": "ZHWG11LM",
+			"makeArgs": ["BOARD=ZHWG11LM"]
+		}
+	],
+	"makefile.configureOnOpen": true
+}
