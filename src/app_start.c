@@ -10,12 +10,12 @@
 
 /* Application */
 #include "app_main.h"
+#include "app_pdm.h"
 #include "app_router_node.h"
 #include "app_uart.h"
 
 /* SDK JN-SW-4170 */
 #include "AppHardwareApi.h"
-#include "PDM.h"
 #include "bdb_api.h"
 #include "dbg.h"
 #include "dbg_uart.h"
@@ -89,9 +89,8 @@ PRIVATE void APP_vInitialise(void)
      * device to doze when in the idle task */
     PWRM_vInit(E_AHI_SLEEP_OSCON_RAMON);
 
-    /* Initialise the Persistent Data Manager
-     * If this parameter is set to zero, the application is given access to the full EEPROM. */
-    PDM_eInitialise(0);
+    /* Initialise the Persistent Data Manager. */
+    APP_PDM_bInitialise();
 
     /* Initialise the UART peripheral */
     UART_vInit();
@@ -103,6 +102,11 @@ PRIVATE void APP_vInitialise(void)
 
     /* Initialise application */
     APP_vInitialiseRouter();
+
+#if TRACE_PDM
+    /* Print PDM usage after application initialisation. */
+    APP_PDM_vPrintSegmentUsage();
+#endif
 }
 
 #if TRACE_APP

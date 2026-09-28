@@ -10,9 +10,9 @@
 #include "PDM_IDs.h"
 #include "app_green_power.h"
 #include "app_main.h"
+#include "app_pdm.h"
 
 /* SDK JN-SW-4170 */
-#include "PDM.h"
 #include "ZTimer.h"
 #include "dbg.h"
 #include "gp.h"
@@ -22,13 +22,14 @@
 #endif
 
 #define APP_GP_MAGIC 0x4C524701UL /* LR + G (Green Power) + revision 1 */
+
 #define GP_TICK_TIME ZTIMER_TIME_MSEC(1)
 
 /* ZCL uses local endpoint numbering; the SDK maps GP endpoint 242 to this local endpoint. */
 #define APP_GP_LOCAL_ENDPOINT 2
 
 typedef struct {
-    uint32 u32Magic;
+    APP_PDM_tsHeader sHeader;
     tsGP_ZgppProxySinkTable asProxyTable[GP_NUMBER_OF_PROXY_SINK_TABLE_ENTRIES];
 } APP_tsProxyTableRecord;
 
@@ -138,7 +139,7 @@ PUBLIC void APP_vHandleGreenPowerEvent(tsGP_GreenPowerCallBackMessage *psMessage
  */
 PUBLIC void APP_vRestoreGreenPowerDefaults(void)
 {
-    PDM_vDeleteDataRecord(PDM_ID_APP_GP_PROXY_TABLE);
+    APP_PDM_vDeleteRecord(PDM_ID_APP_GP_PROXY_TABLE);
     vGP_RestorePersistedData(NULL, E_GP_DEFAULT_ATTRIBUTE_VALUE | E_GP_DEFAULT_PROXY_SINK_TABLE_VALUE);
 }
 
@@ -148,29 +149,8 @@ PUBLIC void APP_vRestoreGreenPowerDefaults(void)
 PRIVATE void APP_vLoadProxyTable(void)
 {
     APP_tsProxyTableRecord sRecord;
-    uint16 u16RecordLength;
-    uint16 u16BytesRead = 0;
 
-    /* JN516x PDM reads the entire record without enforcing the buffer size.
-     * Check the stored length before reading to prevent a buffer overflow. */
-    if (!PDM_bDoesDataExist(PDM_ID_APP_GP_PROXY_TABLE, &u16RecordLength)) {
-        DBG_vPrintf(TRACE_GP, "PDM: Proxy table record not found, using defaults\n");
-        return;
-    }
-
-    if (u16RecordLength != sizeof(sRecord)) {
-        DBG_vPrintf(TRACE_GP, "PDM: Unexpected proxy table record length=%u\n", u16RecordLength);
-        return;
-    }
-
-    PDM_teStatus eStatus = PDM_eReadDataFromRecord(PDM_ID_APP_GP_PROXY_TABLE, &sRecord, sizeof(sRecord), &u16BytesRead);
-    if ((eStatus != PDM_E_STATUS_OK) || (u16BytesRead != sizeof(sRecord))) {
-        DBG_vPrintf(TRACE_GP, "PDM: Proxy table read failed, status=%d length=%u\n", eStatus, u16BytesRead);
-        return;
-    }
-
-    if (sRecord.u32Magic != APP_GP_MAGIC) {
-        DBG_vPrintf(TRACE_GP, "PDM: Invalid proxy table record magic=%08lx\n", (unsigned long)sRecord.u32Magic);
+    if (!APP_PDM_bReadRecord(PDM_ID_APP_GP_PROXY_TABLE, &sRecord, sizeof(sRecord), APP_GP_MAGIC)) {
         return;
     }
 
@@ -184,14 +164,10 @@ PRIVATE void APP_vLoadProxyTable(void)
  */
 PRIVATE void APP_vSaveProxyTable(void)
 {
-    APP_tsProxyTableRecord sRecord = {.u32Magic = APP_GP_MAGIC};
+    APP_tsProxyTableRecord sRecord;
 
     memcpy(sRecord.asProxyTable,
            sGreenPower.sGreenPowerCustomDataStruct.asZgpsSinkProxyTable,
            sizeof(sRecord.asProxyTable));
-
-    PDM_teStatus eStatus = PDM_eSaveRecordData(PDM_ID_APP_GP_PROXY_TABLE, &sRecord, sizeof(sRecord));
-    if (eStatus != PDM_E_STATUS_OK) {
-        DBG_vPrintf(TRACE_GP, "PDM: Failed to save proxy table, status=%d\n", eStatus);
-    }
+    APP_PDM_bSaveRecord(PDM_ID_APP_GP_PROXY_TABLE, &sRecord, sizeof(sRecord), APP_GP_MAGIC);
 }

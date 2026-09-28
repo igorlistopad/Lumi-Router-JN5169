@@ -13,6 +13,7 @@
 #include "app_device_temperature.h"
 #include "app_green_power.h"
 #include "app_main.h"
+#include "app_pdm.h"
 #include "app_reporting.h"
 #include "app_router_node.h"
 #include "app_zcl_task.h"
@@ -20,7 +21,6 @@
 /* SDK JN-SW-4170 */
 #include "AppApi.h"
 #include "AppHardwareApi.h"
-#include "PDM.h"
 #include "ZTimer.h"
 #include "bdb_api.h"
 #include "dbg.h"
@@ -47,7 +47,7 @@ typedef enum {
 } APP_teNodeState;
 
 typedef struct {
-    uint32 u32Magic;
+    APP_PDM_tsHeader sHeader;
     APP_teNodeState eNodeState;
 } APP_tsNodeStateRecord;
 
@@ -124,11 +124,6 @@ PUBLIC void APP_vInitialiseRouter(void)
                 sBDB.sAttrib.bbdbNodeIsOnANetwork);
 
 #if TRACE_APP
-    DBG_vPrintf(TRACE_APP,
-                "PDM: Segments free=%u used=%u\n",
-                (unsigned int)PDM_u8GetSegmentCapacity(),
-                (unsigned int)PDM_u8GetSegmentOccupancy());
-
     APP_vPrintAPSTable();
 #endif
 }
@@ -212,6 +207,9 @@ PUBLIC void APP_cbTimerNetworkRetry(void *pvParam)
     case E_NODE_REJOIN_REQUIRED:
         APP_vStartNetworkRejoin();
         break;
+
+    default:
+        break;
     }
 }
 
@@ -263,29 +261,8 @@ PRIVATE void APP_vStartNetworkRejoin(void)
 PRIVATE APP_teNodeState APP_eLoadNodeState(void)
 {
     APP_tsNodeStateRecord sRecord;
-    uint16 u16RecordLength;
-    uint16 u16BytesRead = 0;
 
-    /* JN516x PDM reads the entire record without enforcing the buffer size.
-     * Check the stored length before reading to prevent a buffer overflow. */
-    if (!PDM_bDoesDataExist(PDM_ID_APP_NODE_STATE, &u16RecordLength)) {
-        DBG_vPrintf(TRACE_APP, "PDM: Node state record not found, using default\n");
-        return E_NODE_NOT_JOINED;
-    }
-
-    if (u16RecordLength != sizeof(sRecord)) {
-        DBG_vPrintf(TRACE_APP, "PDM: Unexpected node state record length=%u\n", u16RecordLength);
-        return E_NODE_NOT_JOINED;
-    }
-
-    PDM_teStatus eStatus = PDM_eReadDataFromRecord(PDM_ID_APP_NODE_STATE, &sRecord, sizeof(sRecord), &u16BytesRead);
-    if ((eStatus != PDM_E_STATUS_OK) || (u16BytesRead != sizeof(sRecord))) {
-        DBG_vPrintf(TRACE_APP, "PDM: Node state read failed, status=%d length=%u\n", eStatus, u16BytesRead);
-        return E_NODE_NOT_JOINED;
-    }
-
-    if (sRecord.u32Magic != APP_NODE_STATE_MAGIC) {
-        DBG_vPrintf(TRACE_APP, "PDM: Invalid node state record magic=%08lx\n", (unsigned long)sRecord.u32Magic);
+    if (!APP_PDM_bReadRecord(PDM_ID_APP_NODE_STATE, &sRecord, sizeof(sRecord), APP_NODE_STATE_MAGIC)) {
         return E_NODE_NOT_JOINED;
     }
 
@@ -303,12 +280,8 @@ PRIVATE void APP_vSetNodeState(APP_teNodeState eNewState)
 
     eNodeState = eNewState;
 
-    APP_tsNodeStateRecord sRecord = {.u32Magic = APP_NODE_STATE_MAGIC, .eNodeState = eNodeState};
-
-    PDM_teStatus eStatus = PDM_eSaveRecordData(PDM_ID_APP_NODE_STATE, &sRecord, sizeof(sRecord));
-    if (eStatus != PDM_E_STATUS_OK) {
-        DBG_vPrintf(TRACE_APP, "PDM: Failed to save node state=%d status=%d\n", eNodeState, eStatus);
-    }
+    APP_tsNodeStateRecord sRecord = {.eNodeState = eNodeState};
+    APP_PDM_bSaveRecord(PDM_ID_APP_NODE_STATE, &sRecord, sizeof(sRecord), APP_NODE_STATE_MAGIC);
 }
 
 /**
@@ -319,7 +292,7 @@ PRIVATE void APP_vHandleAfEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
     ZPS_tsAfEvent *psAfEvent = &psZpsAfEvent->sStackEvent;
 
     if ((psZpsAfEvent->u8EndPoint == LUMIROUTER_APPLICATION_ENDPOINT) ||
-        (psZpsAfEvent->u8EndPoint == ZCL_GP_PROXY_ENDPOINT_ID) ||
+        (psZpsAfEvent->u8EndPoint == LUMIROUTER_GREENPOWERPROXY_ENDPOINT) ||
         (psAfEvent->eType == ZPS_EVENT_APS_ZGP_DATA_CONFIRM)) {
         if ((psAfEvent->eType == ZPS_EVENT_APS_DATA_INDICATION) ||
             (psAfEvent->eType == ZPS_EVENT_APS_ZGP_DATA_INDICATION) ||

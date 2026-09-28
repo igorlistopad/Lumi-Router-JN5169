@@ -7,12 +7,12 @@
 
 /* Application */
 #include "app_main.h"
+#include "app_pdm.h"
 #include "app_serial_commands.h"
 #include "app_uart.h"
 
 /* SDK JN-SW-4170 */
 #include "AppHardwareApi.h"
-#include "PDM.h"
 #include "ZQueue.h"
 #include "dbg.h"
 
@@ -149,7 +149,7 @@ PRIVATE void APP_vProcessCommand(uint8 u8Command)
     case E_SC_MSG_ERASE_PERSISTENT_DATA:
         APP_vSendSerialMessage("Erase PDM.......");
         APP_vSendSerialMessage("Reset...........");
-        PDM_vDeleteAllDataRecords();
+        APP_PDM_vDeleteAllRecords();
         vAHI_SwReset();
         break;
 

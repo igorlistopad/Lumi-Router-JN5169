@@ -66,6 +66,7 @@ ifeq ($(DEBUG_ENABLED), 1)
 	CFLAGS += -DDEBUG_ENABLED
 	CFLAGS += -DDEBUG_BDB
 	CFLAGS += -DTRACE_APP=1
+	CFLAGS += -DTRACE_PDM=1
 	CFLAGS += -DTRACE_GP=1
 	CFLAGS += -DTRACE_REPORT=1
 	CFLAGS += -DTRACE_ZCL=1
@@ -110,6 +111,7 @@ APPSRC += pdum_apdu.S
 APPSRC += zps_gen.c
 APPSRC += app_start.c
 APPSRC += app_main.c
+APPSRC += app_pdm.c
 APPSRC += app_router_node.c
 APPSRC += app_zcl_task.c
 APPSRC += app_green_power.c

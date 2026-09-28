@@ -11,12 +11,12 @@
 
 /* Application */
 #include "PDM_IDs.h"
+#include "app_pdm.h"
 #include "app_reporting.h"
 #include "zcl_options.h"
 
 /* SDK JN-SW-4170 */
 #include "DeviceTemperatureConfiguration.h"
-#include "PDM.h"
 #include "dbg.h"
 #include "zcl.h"
 
@@ -24,7 +24,8 @@
 #define TRACE_REPORT FALSE
 #endif
 
-#define APP_REPORTS_MAGIC        0x4C525201UL /* LR + R (Reports) + revision 1 */
+#define APP_REPORTS_MAGIC 0x4C525201UL /* LR + R (Reports) + revision 1 */
+
 #define APP_REPORT_INDEX_INVALID 0xFF
 
 #define DEVICE_TEMPERATURE_MINIMUM_REPORTABLE_CHANGE   0x01
@@ -37,7 +38,7 @@ typedef struct {
 } APP_tsReports;
 
 typedef struct {
-    uint32 u32Magic;
+    APP_PDM_tsHeader sHeader;
     APP_tsReports asReports[NUMBER_OF_REPORTS];
 } APP_tsReportsRecord;
 
@@ -70,29 +71,8 @@ PRIVATE APP_tsReports asDefaultReports[NUMBER_OF_REPORTS] = {
 PUBLIC bool_t APP_bRestoreReports(void)
 {
     APP_tsReportsRecord sRecord;
-    uint16 u16RecordLength;
-    uint16 u16BytesRead = 0;
 
-    /* JN516x PDM reads the entire record without enforcing the buffer size.
-     * Check the stored length before reading to prevent a buffer overflow. */
-    if (!PDM_bDoesDataExist(PDM_ID_APP_REPORTS, &u16RecordLength)) {
-        DBG_vPrintf(TRACE_REPORT, "PDM: Reports record not found, using defaults\n");
-        return FALSE;
-    }
-
-    if (u16RecordLength != sizeof(sRecord)) {
-        DBG_vPrintf(TRACE_REPORT, "PDM: Unexpected reports record length=%u\n", u16RecordLength);
-        return FALSE;
-    }
-
-    PDM_teStatus eStatus = PDM_eReadDataFromRecord(PDM_ID_APP_REPORTS, &sRecord, sizeof(sRecord), &u16BytesRead);
-    if ((eStatus != PDM_E_STATUS_OK) || (u16BytesRead != sizeof(sRecord))) {
-        DBG_vPrintf(TRACE_REPORT, "PDM: Reports read failed, status=%d length=%u\n", eStatus, u16BytesRead);
-        return FALSE;
-    }
-
-    if (sRecord.u32Magic != APP_REPORTS_MAGIC) {
-        DBG_vPrintf(TRACE_REPORT, "PDM: Invalid reports record magic=%08lx\n", (unsigned long)sRecord.u32Magic);
+    if (!APP_PDM_bReadRecord(PDM_ID_APP_REPORTS, &sRecord, sizeof(sRecord), APP_REPORTS_MAGIC)) {
         return FALSE;
     }
 
@@ -205,14 +185,10 @@ APP_vRestoreDefaultRecord(uint8 u8EndPointID,
  */
 PRIVATE void APP_vSaveReportsRecord(void)
 {
-    APP_tsReportsRecord sRecord = {.u32Magic = APP_REPORTS_MAGIC};
+    APP_tsReportsRecord sRecord;
 
     memcpy(sRecord.asReports, asSavedReports, sizeof(asSavedReports));
-
-    PDM_teStatus eStatus = PDM_eSaveRecordData(PDM_ID_APP_REPORTS, &sRecord, sizeof(sRecord));
-    if (eStatus != PDM_E_STATUS_OK) {
-        DBG_vPrintf(TRACE_REPORT, "PDM: Failed to save reports, status=%d\n", eStatus);
-    }
+    APP_PDM_bSaveRecord(PDM_ID_APP_REPORTS, &sRecord, sizeof(sRecord), APP_REPORTS_MAGIC);
 }
 
 /**
