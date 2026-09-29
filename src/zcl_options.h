@@ -53,6 +53,9 @@ enum {
 #define CLD_GREENPOWER
 #define GP_PROXY_BASIC_DEVICE
 
+/* Basic cluster optional commands */
+#define CLD_BAS_CMD_RESET_TO_FACTORY_DEFAULTS
+
 /* Basic cluster optional attributes */
 #define CLD_BAS_ATTR_MANUFACTURER_NAME
 #define CLD_BAS_ATTR_MODEL_IDENTIFIER
@@ -62,20 +65,20 @@ enum {
 #define BAS_MANUF_NAME_STRING "OpenLumi"
 
 #ifdef BOARD_DGNWG05LM
-#define BAS_MODEL_ID_STRING   "openlumi.gw_router.dgnwg05lm"
+#define BAS_MODEL_ID_STRING "openlumi.gw_router.dgnwg05lm"
 #endif
 
 #ifdef BOARD_ZHWG11LM
-#define BAS_MODEL_ID_STRING   "openlumi.gw_router.zhwg11lm"
+#define BAS_MODEL_ID_STRING "openlumi.gw_router.zhwg11lm"
 #endif
 
-#define BAS_DATE_STRING       BUILD_DATE_STRING
-#define BAS_SW_BUILD_STRING   VERSION_STRING
+#define BAS_DATE_STRING     BUILD_DATE_STRING
+#define BAS_SW_BUILD_STRING VERSION_STRING
 
-#define CLD_BAS_MANUF_NAME_SIZE  (sizeof(BAS_MANUF_NAME_STRING) - 1U)
-#define CLD_BAS_MODEL_ID_SIZE    (sizeof(BAS_MODEL_ID_STRING) - 1U)
-#define CLD_BAS_DATE_SIZE        (sizeof(BAS_DATE_STRING) - 1U)
-#define CLD_BAS_SW_BUILD_SIZE    (sizeof(BAS_SW_BUILD_STRING) - 1U)
-#define CLD_BAS_POWER_SOURCE     E_CLD_BAS_PS_SINGLE_PHASE_MAINS
+#define CLD_BAS_MANUF_NAME_SIZE (sizeof(BAS_MANUF_NAME_STRING) - 1U)
+#define CLD_BAS_MODEL_ID_SIZE   (sizeof(BAS_MODEL_ID_STRING) - 1U)
+#define CLD_BAS_DATE_SIZE       (sizeof(BAS_DATE_STRING) - 1U)
+#define CLD_BAS_SW_BUILD_SIZE   (sizeof(BAS_SW_BUILD_STRING) - 1U)
+#define CLD_BAS_POWER_SOURCE    E_CLD_BAS_PS_SINGLE_PHASE_MAINS
 
 #endif /* ZCL_OPTIONS_H */

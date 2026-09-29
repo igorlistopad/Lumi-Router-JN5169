@@ -19,9 +19,9 @@
 
 /* SDK JN-SW-4170 */
 #include "Basic.h"
-#include "Identify.h"
 #include "DeviceTemperatureConfiguration.h"
 #include "GreenPower.h"
+#include "Identify.h"
 #include "ZTimer.h"
 #include "dbg.h"
 #include "zcl.h"
@@ -216,6 +216,21 @@ PRIVATE void APP_ZCL_cbEndpointCallback(tsZCL_CallBackEvent *psEvent)
 PRIVATE void APP_ZCL_vHandleClusterCustomCommands(tsZCL_CallBackEvent *psEvent)
 {
     switch (psEvent->uMessage.sClusterCustomMessage.u16ClusterId) {
+    case GENERAL_CLUSTER_ID_BASIC: {
+        tsCLD_BasicCallBackMessage *psMessage =
+            (tsCLD_BasicCallBackMessage *)psEvent->uMessage.sClusterCustomMessage.pvCustomData;
+
+        if (psMessage->u8CommandId == E_CLD_BASIC_CMD_RESET_TO_FACTORY_DEFAULTS) {
+            /* ZCL R6 3.2.2.3.1.1: restore cluster attribute defaults only.
+             * IdentifyTime is the only writable attribute enabled in this build.
+             * Network state, bindings, groups, reporting and the GP proxy table remain unchanged.
+             */
+            DBG_vPrintf(TRACE_ZCL, "ZCL Endpoint Callback: Basic reset to factory defaults received\n");
+            sLumiRouter.sIdentifyServerCluster.u16IdentifyTime = 0;
+        }
+        break;
+    }
+
     case GENERAL_CLUSTER_ID_IDENTIFY: {
         tsCLD_IdentifyCallBackMessage *psMessage =
             (tsCLD_IdentifyCallBackMessage *)psEvent->uMessage.sClusterCustomMessage.pvCustomData;
