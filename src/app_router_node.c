@@ -76,25 +76,21 @@ PUBLIC void APP_vInitialiseRouter(void)
     /* Initialise ZCL. */
     APP_ZCL_vInitialise();
 
-#ifdef BOARD_DGNWG05LM
-    /* Explicitly define the Xiaomi radio profile: a +8 dBm TX limit on all
-     * channels and a raw CCA threshold of 65. Operation remains unchanged
-     * at the default TX power of +8 dBm. */
-    vAppApiSetComplianceLimits(8, 8, 65);
-#endif
-
 #ifdef BOARD_ZHWG11LM
-    /* Aqara uses an external Skyworks SKY66112-11 FEM with an integrated PA and LNA.
-     * Limit JN5169 TX power before the FEM to -2 dBm on channels 11-25
-     * and -10 dBm on channel 26.
-     * When transmitting at these limits, expected FEM output power is approximately
-     * +20 dBm on channels 11-25 and +10 dBm on channel 26. These are datasheet-based
-     * estimates, excluding board losses and antenna gain, not measured values.
-     * Set the raw CCA ED threshold to 97 to account for the typical 11 dB
-     * LNA gain, approximately matching the antenna-referred threshold of
-     * CCA code 65 on Xiaomi without a FEM.
-     * Enable both TX and RX control signals for the FEM. */
+    /* The Zigbee module in Aqara ZHWG11LM uses an external SKY66112-11 PA/LNA FEM.
+     * Limit JN5169 TX power to -2 dBm on channels 11-25 and -10 dBm on channel 26.
+     * The -2 dBm limit follows Skyworks' recommendation to avoid high TX current.
+     * These match the effective TX power levels used by the original
+     * Zigbee module firmware in the Aqara ZHWG11LM gateway.
+     * At these limits, estimated FEM output power is +20 dBm on channels 11-25
+     * and +10 dBm on channel 26. These are datasheet-based estimates, excluding
+     * board losses and antenna gain, not measured values.
+     * Set the raw CCA ED threshold to 97 to account for the typical 11 dB LNA gain,
+     * approximately matching the default threshold of 65 on JN5169 without a FEM
+     * when referred to the antenna input. */
     vAppApiSetComplianceLimits(-2, -10, 97);
+
+    /* Enable RFTX and RFRX control outputs for the FEM. */
     vAHI_HighPowerModuleEnable(TRUE, TRUE);
 #endif
 
@@ -103,6 +99,13 @@ PUBLIC void APP_vInitialiseRouter(void)
     if (eZpsStatus != ZPS_E_SUCCESS) {
         DBG_vPrintf(TRACE_APP, "ZPS: Initialisation failed status=%02x\n", eZpsStatus);
     }
+
+#ifdef BOARD_DGNWG05LM
+    /* Set TX power to +10 dBm, the maximum supported by JN5169,
+     * as used by the original Zigbee module firmware in the Xiaomi DGNWG05LM gateway.
+     * Apply after stack initialisation, which resets the MAC and PHY. */
+    eAppApiPlmeSet(PHY_PIB_ATTR_TX_POWER, 10);
+#endif
 
     /* Initialise BDB. */
     APP_vBdbInit();
