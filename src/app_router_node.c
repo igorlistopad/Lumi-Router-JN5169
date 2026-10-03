@@ -351,7 +351,7 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
 
     case ZPS_EVENT_ZDO_LINK_KEY:
         DBG_vPrintf(TRACE_APP,
-                    "APP-ZDO: Link key installed type=%u ieee=%016llx\n",
+                    "APP-ZDO: Link key received type=%u ieee=%016llx\n",
                     psAfEvent->uEvent.sZdoLinkKeyEvent.u8KeyType,
                     psAfEvent->uEvent.sZdoLinkKeyEvent.u64IeeeLinkAddr);
         break;
@@ -413,7 +413,7 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
 
     case ZPS_EVENT_NWK_ROUTE_DISCOVERY_CONFIRM:
         DBG_vPrintf(TRACE_APP,
-                    "APP-ZDO: Route discovery dst=%04x mac=%02x nwk=%02x\n",
+                    "APP-ZDO: Route discovery dst=%04x status=%02x detail=%02x\n",
                     psAfEvent->uEvent.sNwkRouteDiscoveryConfirmEvent.u16DstAddress,
                     psAfEvent->uEvent.sNwkRouteDiscoveryConfirmEvent.u8Status,
                     psAfEvent->uEvent.sNwkRouteDiscoveryConfirmEvent.u8NwkStatus);
@@ -463,10 +463,13 @@ PRIVATE void APP_vHandleZdoEvents(BDB_tsZpsAfEvent *psZpsAfEvent)
 
     case ZPS_EVENT_APS_DATA_INDICATION:
         DBG_vPrintf(TRACE_APP,
-                    "APP-ZDO: Data indication status=%02x src=%04x srcEp=%u dstEp=%u "
-                    "profile=%04x cluster=%04x\n",
+                    "APP-ZDO: Data indication status=%02x srcMode=%u src=%016llx "
+                    "srcEp=%u dstEp=%u profile=%04x cluster=%04x\n",
                     psAfEvent->uEvent.sApsDataIndEvent.eStatus,
-                    psAfEvent->uEvent.sApsDataIndEvent.uSrcAddress.u16Addr,
+                    psAfEvent->uEvent.sApsDataIndEvent.u8SrcAddrMode,
+                    (psAfEvent->uEvent.sApsDataIndEvent.u8SrcAddrMode == ZPS_E_ADDR_MODE_IEEE)
+                        ? psAfEvent->uEvent.sApsDataIndEvent.uSrcAddress.u64Addr
+                        : (uint64)psAfEvent->uEvent.sApsDataIndEvent.uSrcAddress.u16Addr,
                     psAfEvent->uEvent.sApsDataIndEvent.u8SrcEndpoint,
                     psAfEvent->uEvent.sApsDataIndEvent.u8DstEndpoint,
                     psAfEvent->uEvent.sApsDataIndEvent.u16ProfileId,
