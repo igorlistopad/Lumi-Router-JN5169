@@ -1,33 +1,44 @@
 # Lumi Router
 
-This firmware replaces the original firmware for the __Zigbee__ JN5169 chip in __Xiaomi DGNWG05LM__ and __Aqara ZHWG11LM__ gateways. It allows the gateway to operate as a Zigbee router in any Zigbee network instead of using the stock coordinator firmware for the proprietary Xiaomi Mi Home network.
+This firmware replaces the stock firmware on the **JN5169 Zigbee chip** in **Xiaomi DGNWG05LM** and **Aqara ZHWG11LM** gateways. Instead of serving as a coordinator for the proprietary Xiaomi Mi Home network, the gateway can operate as a router in any Zigbee network.
 
----
-
-These instructions assume that alternative __OpenWrt__ firmware is already installed on the gateway. If it is not, follow the guide at [https://openlumi.github.io](https://openlumi.github.io).
+These instructions assume **OpenWrt** is already installed on the gateway. If not, follow the [OpenLumi guide](https://openlumi.github.io/).
 
 ## Firmware
 
+| Device | Firmware file |
+|---|---|
+| Xiaomi DGNWG05LM | `LumiRouter-DGNWG05LM.bin` |
+| Aqara ZHWG11LM | `LumiRouter-ZHWG11LM.bin` |
+
 **Web interface**
 
-1. Go to `LuCI -> System -> Zigbee Tools`
-2. Click the `Upload Firmware…` button.
-3. Select the firmware file to upload.
-4. Click the `Upload` button.
+1. Download the firmware file for your device model from [Releases](https://github.com/igorlistopad/Lumi-Router-JN5169/releases).
+2. Go to `LuCI -> System -> Zigbee Tools`.
+3. Click the `Upload Firmware…` button.
+4. Select the downloaded file and click `Upload`.
 
 **Command line**
 
-1. Connect to the device via SSH.
-2. Run the following commands:
+Connect to the device via SSH and run the commands for your model.
+
+*For Xiaomi:*
 
 ```shell
-wget https://github.com/igorlistopad/Lumi-Router-JN5169/releases/latest/download/LumiRouter.bin -P /tmp
-jnflash /tmp/LumiRouter.bin
+wget https://github.com/igorlistopad/Lumi-Router-JN5169/releases/latest/download/LumiRouter-DGNWG05LM.bin -O /tmp/LumiRouter-DGNWG05LM.bin
+jnflash /tmp/LumiRouter-DGNWG05LM.bin
+```
+
+*For Aqara:*
+
+```shell
+wget https://github.com/igorlistopad/Lumi-Router-JN5169/releases/latest/download/LumiRouter-ZHWG11LM.bin -O /tmp/LumiRouter-ZHWG11LM.bin
+jnflash /tmp/LumiRouter-ZHWG11LM.bin
 ```
 
 ## Reset and pairing
 
-Erase the PDM data to reset the device and start joining a new Zigbee network.
+To reset the Zigbee settings, perform a PDM erase. After the reset, the device automatically searches for a network open for joining.
 
 **Web interface**
 
