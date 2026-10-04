@@ -55,14 +55,11 @@ jobs:
         body: |
           ## Firmware files
 
-          > [!WARNING]
-          > The firmware files are **not interchangeable**: they use different radio settings. Choose the file for your device model.
-
           | Device | File | SHA-256 |
           |---|---|---|
           | Xiaomi DGNWG05LM | `LumiRouter-DGNWG05LM.bin` | `${{ steps.checksums.outputs.xiaomi }}` |
           | Aqara ZHWG11LM | `LumiRouter-ZHWG11LM.bin` | `${{ steps.checksums.outputs.aqara }}` |
 
-          **Build**: [GitHub Actions #${{ github.run_id }}][build-run]
+          Built with GitHub Actions: [#${{ github.run_id }}][build-run].
 
           [build-run]: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>
